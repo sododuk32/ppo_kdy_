@@ -103,9 +103,30 @@
     host.innerHTML = window.SKILLS.map(s=>
       `<div class="skill-card glass-sm reveal">
         <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${s.title}</h3><div class="sc-sub">// ${s.sub}</div></div></div>
-        <div class="skill-list">${s.rows.map(r=>
-          `<div class="row"><span class="nm">${r.nm}</span><span class="bar"><i style="width:${r.v}%"></i></span></div>`).join('')}</div>
+        <ul class="skill-list">${s.rows.map(r=>`<li>${r.nm}</li>`).join('')}</ul>
       </div>`).join('');
+  }
+
+  // ---------- 프로젝트 소개 (about: 비기술 · 전체 설명) ----------
+  const ABOUT_ROWS = [
+    ['what',    '무엇을'],
+    ['problem', '왜'],
+    ['role',    '내 역할'],
+    ['outcome', '결과'],
+  ];
+  const ABOUT_META = [['period','기간'],['team','팀 구성'],['client','대상']];
+  function aboutHTML(p){
+    const a = p.about; if(!a) return '';
+    const rows = ABOUT_ROWS.filter(([k])=>a[k]).map(([k,label])=>
+      `<div class="dp-about-row"><div class="dp-about-k">${label}</div><div class="dp-about-v">${a[k]}</div></div>`).join('');
+    const m = a.meta||{};
+    const chips = ABOUT_META.filter(([k])=>m[k]).map(([k,label])=>`<span>${label} · ${m[k]}</span>`).join('');
+    if(!rows && !chips) return '';
+    return `<div class="dp-about">
+      <div class="dp-about-h">프로젝트 소개 <span class="fmt">overview</span></div>
+      ${rows}
+      ${chips?`<div class="dp-about-meta">${chips}</div>`:''}
+    </div>`;
   }
 
   // ---------- render: projects ----------
@@ -117,6 +138,7 @@
       const subs = subTitles.map(t=>`<li>${t}<span class="ar">›</span></li>`).join('');
       return `<div class="pcard glass reveal" data-id="${p.id}">
         <div class="ptop"><div><span class="pname">${p.name}</span></div><span class="pyear">${p.year}</span></div>
+        ${(p.about&&p.about.tagline)?`<div class="ptag">${p.about.tagline}</div>`:''}
         <div class="psum">${p.summary}</div>
         <div class="lbl">기술 스택</div><div class="stack">${stk}</div>
         ${(p.nodes&&p.nodes.length)?`<div class="lbl">아키텍처</div>
@@ -322,6 +344,11 @@
     $('#dpTitle').textContent=p.name;
     $('#dpYear').textContent=p.year;
     $('#dpStack').innerHTML=p.stack.map(s=>`<span class="stk">${s}</span>`).join('');
+    const tagEl=$('#dpTagline');
+    if(tagEl){ const tl=(p.about&&p.about.tagline)||''; tagEl.innerHTML=tl; tagEl.style.display=tl?'':'none'; }
+    const abEl=$('#dpAbout');
+    if(abEl){ const ab=aboutHTML(p); abEl.innerHTML=ab; abEl.style.display=ab?'':'none'; }
+    const techH=$('#dpTechH'); if(techH) techH.style.display=p.overview?'':'none';
     $('#dpOverview').textContent=p.overview;
     $('#dpStructWrap').innerHTML=`<span class="dp-struct-chip"><span style="width:7px;height:7px;border-radius:2px;background:var(--struct);display:inline-block"></span> 구조 유형 · ${p.struct}</span>`;
     const diag=$('#dpDiag');
@@ -379,7 +406,13 @@
 
   // ---------- theme ----------
   const root=document.documentElement, tt=$('#themeToggle');
-  function setTheme(t){
+  let themeAnimT=null;
+  function setTheme(t,animate){
+    if(animate){ // 최초 로드에는 걸지 않는다 — 첫 페인트가 번져 보임
+      root.classList.add('theme-anim');
+      clearTimeout(themeAnimT);
+      themeAnimT=setTimeout(()=>root.classList.remove('theme-anim'),500);
+    }
     root.setAttribute('data-theme',t);
     tt.innerHTML = t==='dark' ? ICONS.sun : ICONS.moon;
     try{localStorage.setItem('pf_theme',t);}catch(e){}
@@ -387,7 +420,7 @@
   }
   let savedTheme='light'; try{savedTheme=localStorage.getItem('pf_theme')||'light';}catch(e){}
   setTheme(savedTheme);
-  tt.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+  tt.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark',true));
 
   // ---------- tutorial ----------
   const TUT=[
@@ -401,6 +434,8 @@
     $('#tutBody').innerHTML=TUT[ti].b;
     $('#tutDots').innerHTML=TUT.map((_,i)=>`<i class="${i===ti?'a':''}"></i>`).join('');
     $('#tutNext').textContent= ti<TUT.length-1 ? '다음 →' : '시작하기 ✓';
+    const sl=$('#tutSlide'); // step 전환 애니메이션 재생 (reflow로 재트리거)
+    if(sl){ sl.classList.remove('tut-in'); void sl.offsetWidth; sl.classList.add('tut-in'); }
   }
   function openTut(){ ti=0; renderTut(); tut.classList.add('on'); }
   function closeTut(){ tut.classList.remove('on'); try{localStorage.setItem('pf_tut','1');}catch(e){} }

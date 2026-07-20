@@ -7,12 +7,36 @@ window.SKILLS = [
 ];
 
 // each project: nodes (x,y in 0..100 % of diagram box), edges by node index
+//
+// 설명은 두 층으로 나뉩니다.
+//   about   = 프로젝트 전체 설명 (비기술 · 이 프로젝트가 뭔지). 카드 상단 + 상세 '프로젝트 소개'
+//   summary / overview / work[] = 기술적 설명. 상세 '기술 개요' 이하
+//
+// about 스키마 — 모든 필드 선택. 빈 값('')이면 그 줄은 렌더링에서 자동으로 빠지고,
+// about 자체가 없으면 기존과 완전히 동일하게 동작합니다.
+//   tagline : 한 줄 후킹. 카드 제목 아래 + 상세 제목 아래에 크게. <b> 사용 가능
+//             예) '판매자 5,000명이 쓰던 결제 대시보드를 처음부터 다시 만들었습니다'
+//   what    : 이게 뭐 하는 서비스/제품인지, 누가 쓰는지 (도메인 용어로, 스택 언급 X)
+//   problem : 어떤 문제·상황에서 시작됐는지 (비즈니스·사용자 관점의 배경)
+//   role    : 이 프로젝트에서 내가 맡은 범위와 기여
+//   outcome : 무엇이 달라졌는지 (숫자는 metrics[]가 따로 있으니 여기선 서술로)
+//   meta    : { period:'2025.03 – 2025.09', team:'프론트 2 · 백엔드 1 · 디자이너 1', client:'사내 B2B' }
 window.PROJECTS = [
   {
     id:'p1', name:'셀러집사 웹 서비스 리뉴얼', year:'2025', kind:'solve',
+    about:{
+      tagline:'이커머스 자동화 서비스 셀러집사의 결제·사업자 관리 화면을, 보안이 뚫린 프로토타입에서 실서비스로 다시 세웠습니다.',
+      what:'사업자만 등록하면 상품 소싱부터 판매·반송까지 대신 처리해주는 이커머스 자동화 서비스 셀러집사의 사용자 화면입니다. 자동화 파이프라인이 처리한 결과를 확인하고, 결제와 사업자 정보를 관리하는 용도로 쓰입니다.',
+      problem:'기존 화면은 Express + EJS로 급히 만든 프로토타입이라 SQL 인젝션·XSS 같은 보안 문제를 안고 있었고, 계층 구분이 없어 기능을 더할수록 손대기 어려워졌습니다. 디자인도 전면 개편이 예정돼 있어 화면과 시스템을 함께 다시 만들어야 하는 상황이었습니다.',
+      role:'프론트와 백엔드를 통합한 단일 WAS로 재구축하는 전 과정을 맡았습니다. 디자인 토큰 기반의 공통 컴포넌트 체계를 설계하고, 결제·사업자 이전처럼 실패하면 안 되는 흐름에는 세션·배타 락·테스트를 붙였습니다. 국제화와 향후 마이크로 프론트엔드 전환을 염두에 두고, 도메인·디바이스별로 UI를 떼어낼 수 있는 구조로 설계했습니다(MFE 전환 계획 자체는 이후 취소).',
+      // 국제화(i18n): i18n 칩에 p1을 넣기로 해서, role에 '고려했다' 수준으로만 복구했습니다.
+      // '적용했다'로 올리려면 work[]에 근거 항목이 먼저 필요합니다.
+      outcome:'매 페이지마다 DB를 조회하던 사업자 정보 요청을 세션 기반으로 바꿔 크게 줄였고, 중복 결제와 결제 중 세션 유실을 막았습니다. 상품 파이프라인 단계에 맞춰 상품 등록관리 대시보드까지 만들어 뒀지만, 파이프라인 쪽 업데이트가 진행되지 않아 이 화면은 배포되지 못했습니다.',
+      meta:{ period:'', team:'', client:'' }, // TODO: 기간·팀 구성은 제가 알 수 없어 비워뒀습니다
+    },
     summary:'셀러집사 계정·결제 관리 대시보드 서비스를 Express + EJS 프로토타입에서 Next.js 모놀리식 WAS로 마이그레이션했습니다. 디자인과 시스템을 전면 재작성하며 디자인 시스템·API 계층 구조를 도입하고 보안 취약점을 보완했습니다.',
     struct:'모놀리식 통합 (단일 WAS)',
-    stack:['Next.js','React','TypeScript','Tailwind','shadcn/ui','MySQL','Redis','AWS Lambda'],
+    stack:['Next.js','React','TypeScript','Tailwind','shadcn/ui','Zustand','Zod','MySQL','Redis','Playwright','Jest','AWS Lambda'],
     nodes:[{l:'Client',x:10,y:50},{l:'Next.js WAS',x:40,y:50},{l:'MySQL',x:74,y:20,t:'db'},{l:'Redis',x:74,y:50,t:'ext'},{l:'결제 PG',x:74,y:80,t:'ext'}],
     edges:[[0,1],[1,2],[1,3],[1,4,'bi']],
     overview:'기존 프로토타입은 Express + EJS로 작성돼 SQL 인젝션·XSS 등 보안 문제가 있었습니다. 디자인과 시스템을 모두 재작성하며, 프론트+백을 통합한 Next.js 모놀리식 WAS로 재구축하고 디자인 시스템과 API 계층 구조를 도입했습니다.',
@@ -62,10 +86,18 @@ window.PROJECTS = [
   },
   {
     id:'p2', name:'GEO 마케팅 대시보드', year:'2026', kind:'solve',
+    about:{
+      tagline:'브랜드가 생성형 AI 검색에 얼마나 노출되는지를, 점수로 만들어 보여주는 대시보드입니다.',
+      what:'브랜드가 생성형 AI 검색(GEO)과 기존 검색(SEO)에서 얼마나 노출·인용되는지를 여러 소스에서 모아 점수로 환산해 보여줍니다. 마케팅 담당자가 자사 브랜드의 현재 위치를 확인하고 다음 액션을 정하는 데 씁니다.',
+      problem:'처음에는 여러 회사를 하나의 공통 기준으로 측정하는 단순한 대시보드였습니다. 그런데 사업 방향이 ‘회사별 맞춤 솔루션’으로 바뀌면서, 공통 대상을 전제로 짜인 기존 구조와 DB로는 회사마다 데이터를 나눠 소유·공유·제어하는 요구를 담을 수 없게 됐습니다.',
+      role:'1인 개발자로 이 전환 전체를 맡았습니다(도메인 요구사항은 기획자와 협의). 잡 큐 아키텍처와 멀티테넌시 DB를 다시 설계했고, 남은 시간과 비용을 고려해 이상적인 설계보다 그 상황에서 감당 가능한 설계를 골랐습니다.',
+      outcome:'요구사항이 바뀔 때마다 구조를 갈아엎지 않고, 회사별 측정 대상과 기준을 얹을 수 있는 형태로 정리됐습니다.',
+      meta:{ period:'', team:'1인 개발 · 기획자 협업', client:'' },
+    },
     summary:'기업의 생성형 AI 검색(GEO)·SEO 노출도를 여러 소스에서 수집·LLM 분석·점수화해 마케팅 담당자에게 보여주는 대시보드. 요구사항 급변에 대응해 잡 큐 아키텍처와 멀티테넌시 DB를 재설계했습니다.',
     struct:'2-tier · 잡 큐 (앱: Next.js·워커·Redis / 데이터: PostgreSQL)',
     bigDiag:true,
-    stack:['Next.js 16','React 19','TypeScript','Tailwind','Recharts','Drizzle ORM','Zod','Python','Playwright','PostgreSQL','Redis','GitHub Actions','AWS'],
+    stack:['Next.js 16','React 19','TypeScript','Tailwind','Recharts','Zustand','Drizzle ORM','Zod','Python','Playwright','PostgreSQL','Redis','GitHub Actions','AWS'],
     nodes:[{l:'유저',x:6,y:30},{l:'Next.js WAS',x:22,y:30},{l:'스케줄러',x:14,y:78},{l:'Redis Streams',x:32,y:78,t:'ext'},{l:'Python 워커',x:47,y:54},{l:'PostgreSQL',x:69,y:30,t:'db'},{l:'외부 API',x:89,y:62,t:'ext'},{l:'Ollama(원격)',x:89,y:88,t:'ext'}],
     edges:[[0,1],[1,5,{label:'조회'}],[2,3,{label:'XADD'}],[3,4,{label:'소비'}],[4,5,{label:'저장'}],[4,6,{label:'수집',bi:true}],[4,7,{label:'LLM',bi:true}]],
     zones:[{label:'애플리케이션 tier',x:8,y:16,w:48,h:80},{label:'데이터 tier',x:60,y:14,w:19,h:34}],
@@ -194,6 +226,14 @@ window.PROJECTS = [
 
   {
     id:'p3', name:'데이터 파이프라인 작업', year:'2025', kind:'solve',
+    about:{
+      tagline:'도메인을 모르면 한 줄도 건드릴 수 없는 상품 데이터 파이프라인에, 키워드 판정과 옵션 정규화를 붙였습니다.',
+      what:'사업자만 등록하면 상품 소싱부터 판매·반송까지 대신 처리해주는 셀러집사의 상품정보 데이터 파이프라인입니다. 그중 두 기능을 맡았습니다 — 상품 키워드가 판매에 적합한지 판정하는 기능과, 해외 소싱 상품의 옵션마다 올바른 이미지가 붙도록 데이터를 정규화하는 기능.',
+      problem:'파이프라인은 사람이 지켜보지 않아도 반영구적으로 도는 프로그램이라, 한 단계에서 잘못된 데이터가 통과하면 뒤 단계 전체가 오염됩니다. 게다가 각 단계가 무엇을 전제하고 무엇을 넘기는지 알아야 손댈 수 있어, 도메인 이해 없이는 진행 자체가 불가능한 작업이었습니다.',
+      role:'두 기능의 설계와 구현을 맡았습니다. 밴워드 필터는 형태소 경계를 존중하는 5단계 매칭으로 오탐을 줄였고(‘엄마약국’을 ‘마약’으로 잡지 않도록), LLM 판정에는 JSON 파싱이 실패할 때를 대비한 정규식 폴백과 기본값 처리를 넣었습니다. 옵션 정규화는 이미지가 붙는 축을 대표 옵션으로 올리는 2단 구조로 재정렬했습니다.',
+      outcome:'예외 상황에서도 파이프라인이 멈추지 않도록 알림과 폴백 동작을 함께 붙여, 반영구 실행에 맞는 라이프사이클을 갖췄습니다.',
+      meta:{ period:'', team:'', client:'' },
+    },
     summary:'상품정보 데이터 파이프라인에서 ① 키워드 AI 적합성 판정(형태소 밴워드 필터 + LLM 판정)과 ② 해외 소싱 상품의 옵션 데이터를 올바른 이미지가 표기되도록 정규화하는 작업, 이 두 기능을 맡아 구현했습니다. 도메인 주도 개발을 속도감 있게 경험한 작업입니다.',
     struct:'상품정보 데이터 파이프라인 · 키워드 AI 판정 · 옵션 데이터 정규화',
     stack:['Python','형태소 분석(Kiwi)','Gemini','외부 상품 API','JSON 정규화'],
@@ -204,6 +244,7 @@ window.PROJECTS = [
         detail:[
           '밴워드 필터: 형태소 분석 기반 5단계 매칭으로 금지어를 사전 필터링 — 형태소 경계를 존중해 오탐(예: “엄마약국”≠“마약”)을 줄였습니다.',
           'LLM 판정: Gemini로 Y/N을 판정하되, 응답을 JSON으로 파싱하다 실패하면 정규식 폴백으로 부분 복구하고 누락 키워드는 기본값으로 처리했습니다.',
+          '반 영구적으로 동작하는 프로그램이기에 라이프 사이클을 이에 맞춰야했습니다. 예외상황시 동작에 필요한 알림,폴백 동작이 같이 개발되었습니다.'
         ] },
       { title:'옵션 데이터 정규화 — 올바른 옵션 이미지 표기',
         brief:'해외 소싱 상품의 옵션 데이터를, AI 이미지 가공(수정) 이전 단계에서 옵션마다 올바른 이미지가 표기되도록 정규화하는 작업입니다. 이미지가 붙은 대표 축(예: 색상)을 대표 옵션으로 올리고 나머지를 보조 옵션으로 묶는 2단 구조로 재정렬·재구조화해 전달했습니다.',
@@ -219,9 +260,17 @@ window.PROJECTS = [
 
   {
     id:'p4', name:'실시간 가격변동 커머스 마이그레이션', year:'2023 – 2025', kind:'solve',
+    about:{
+      tagline:'4초마다 수천 개의 가격이 바뀌는 화면을, 틀리지 않게 그려내는 일이었습니다.',
+      what:'항만 코드·원자재 품목 코드처럼 가격과 운송 정보가 실시간으로 변동되는 상품을 다루는 커머스 서비스입니다. 한 화면에 250개 이상이 동시에 노출되고, 그 값들이 계속 갱신됩니다.',
+      problem:'백엔드로는 하루 100GB가 넘는 데이터가 유입되고, 그중 프론트엔드에는 4초 간격으로 최대 1만 개(페이로드 5~25MB)씩 전달됩니다. 이걸 그대로 그리면 화면이 버티지 못합니다. 가격이 틀리게 보이거나 리렌더링이 밀리면 곧바로 거래 사고로 이어지는 성격이라 정확성과 성능을 동시에 잡아야 했습니다. 여기에 백엔드 쪽으로 작업이 몰려 서버에서 감당하기 어려운 영역이 있어, 비즈니스 로직 일부를 프론트엔드가 맡게 됐습니다.',
+      role:'수신·파싱·정렬·검색·필터링을 클라이언트에서 처리하는 구조를 맡았습니다. 정렬 알고리즘을 개선하고, 복잡해진 프로토타입 컴포넌트를 데이터 처리 영역과 UI 영역으로 분리했습니다. 카테고리·국가·시간·브랜드 등 5개 이상 복합 조건을 검사하는 선택 유효성 로직은 Rule Engine으로 분리해 재사용할 수 있게 만들었고, B2B 백오피스도 함께 구현했습니다.',
+      outcome:'평균 정렬 시간과 최초 콘텐츠 렌더 시간을 모두 크게 줄였고(수치는 아래 지표), 컴포넌트를 자주 바꿔도 사용자 경험이 흔들리지 않는 구조를 확보했습니다.',
+      meta:{ period:'', team:'', client:'' },
+    },
     summary:'수천 개 상품이 실시간 변동하고 한 화면에 250개+ 노출되는 커머스 UI. 클라이언트 사이드 데이터 처리·상태관리와 정렬 알고리즘 개선(평균 정렬 시간 70ms→10ms)으로 성능과 유지보수성을 확보했습니다.',
     struct:'실시간 커머스 UI · 클라이언트 사이드 데이터 처리',
-    stack:['Next.js','React','Zustand','MUI Data Grid','react-window','TanStack Query','i18n','AWS (Lambda·SNS·WAF·CloudFront)','Vercel'],
+    stack:['Next.js','React','Zustand','MUI Data Grid','react-window','TanStack Query','i18n','AWS (Lambda·SNS·WAF·CloudFront)','Cloudflare','Vercel'],
     overview:'수천 개 데이터가 실시간 변동하고, 한 화면(뷰포트)에 최소 250개 이상 상품을 노출하며 반응형·적응형을 모두 지원해야 하는 UI였습니다. 초기 빠른 프로토타입으로 높아진 복잡도를 리팩터링으로 크게 개선했고, 컴포넌트를 자주 바꿔도 사용자 경험이 흔들리지 않도록 런타임 데이터 처리·상태관리를 기술적으로 해결했습니다.',
     work:[
       { title:'실시간 데이터 수신·처리',
@@ -273,6 +322,14 @@ window.PROJECTS = [
 
   {
     id:'p6', name:'Angular 15 기반 랜딩 페이지', year:'2023', kind:'build',
+    about:{
+      tagline:'의뢰받은 회사 소개 랜딩을, 다음 마이그레이션 대상이던 Angular로 만들며 프레임워크를 익혔습니다.',
+      what:'유튜브를 포함한 자체 동영상 플레이어가 들어가는 소규모 회사 소개 랜딩 페이지입니다.',
+      problem:'의뢰받은 작업이었는데, 마침 다음 마이그레이션 대상 프로젝트가 Angular로 작성돼 있다는 걸 확인한 시점이었습니다. 그래서 익숙한 스택 대신 Angular 15로 만들기로 하고, 실제 배포·운영까지 가는 작은 프로젝트로 프레임워크를 먼저 익히기로 했습니다.',
+      role:'SSR(Angular Universal) 구성부터 SEO, 대용량 동영상 업로드·관리, AWS 자동 배포 환경까지 혼자 처리했습니다.',
+      outcome:'실제로 배포·운영했고, 이후 마이그레이션 프로젝트에 필요한 Angular 이해와 배포 수단 경험을 짧은 기간에 확보했습니다.',
+      meta:{ period:'', team:'', client:'' },
+    },
     summary:'차기 Angular 마이그레이션을 대비한 프레임워크 선택으로, 자체 동영상 플레이어가 포함된 회사 소개 랜딩을 Angular Universal(SSR)로 개발하고 대용량 동영상 처리·SEO·자동 배포 환경을 구축했습니다.',
     struct:'Angular Universal SSR · 대용량 동영상 · 랜딩 · 자동 배포',
     stack:['Angular','AWS (Beanstalk·CodeCommit·CodePipeline·S3·CloudFront)'],
@@ -299,7 +356,7 @@ window.PROJECTS = [
       { title:'Angular Universal 배포 자동화',
         brief:'Angular Universal(SSR) 웹앱을 AWS에 올리고, CodeCommit+CodePipeline·Beanstalk 롤링 배포로 자동·안정 배포 환경을 구축했습니다.',
         detail:[
-          '차기 마이그레이션 프로젝트가 Angular라 Angular 기반으로 진행.',
+          '차기 마이그레이션 프로젝트가 Angular로 작성된걸 확인하고 Angular 기반으로 진행.',
           'AWS 기반 Angular Universal 웹앱 배포.',
           'CodeCommit + CodePipeline 자동 배포, Beanstalk 롤링 배포로 안정적 배포 환경 구축.',
         ] },
@@ -309,6 +366,14 @@ window.PROJECTS = [
 
   {
     id:'p7', name:'안드로이드 문자 모니터링 앱', year:'2023', kind:'build',
+    about:{
+      tagline:'개별 기기에만 남던 알림 문자를, 한 대시보드에서 보게 만들었습니다.',
+      what:'기기에 오는 알림·문자를 조회·파싱해 조건에 맞는 것만 웹서버로 보내는 안드로이드 전용 앱입니다. 전달된 메시지는 대시보드에서 모니터링하고 비즈니스 로직에 연동했습니다.',
+      problem:'알림 문자가 각 기기 안에만 남아 있어, 여러 기기와 웹서비스가 같은 정보를 공유할 방법이 없었습니다.',
+      role:'앱 전체를 구현했습니다. 메시지 조회·파싱과 조건 판정, 서버 전송까지 맡았고, 빠른 구현을 위해 학부에서 다뤄 본 Java로 네이티브 로직을 작성했습니다.',
+      outcome:'조건에 맞는 문자만 선별해 전달함으로써, 흩어져 있던 여러 기기의 알림을 한 대시보드에서 모니터링할 수 있게 됐습니다.',
+      meta:{ period:'', team:'', client:'' },
+    },
     summary:'기기의 알림·문자를 조회·파싱해 조건에 맞는 메시지만 웹서버로 전달하는 안드로이드 앱. 전달된 메시지는 대시보드에서 모니터링·비즈니스 로직에 활용했습니다.',
     struct:'안드로이드 전용 · 메시지 파싱 → 웹서버 전송',
     stack:['React Native','Java','Android (API 30~33)'],
@@ -334,8 +399,8 @@ window.PROJECTS = [
 // keyword chips → 매칭 프로젝트 id 목록(ps). 클릭 시 목록 표시 → 프로젝트 클릭 시 상세 이동.
 window.CHIPS = [
   [ {t:'Next.js',ps:['p1','p2','p4']},{t:'React',ps:['p1','p2','p4']},{t:'TypeScript',ps:['p1','p2','cv']},{t:'JavaScript',ps:['cv']},{t:'Python',ps:['p2','p3']},{t:'Angular',ps:['p6']},{t:'React Native',ps:['p7']},{t:'Java',ps:['p7']} ],
-  [ {t:'Zustand',ps:['p4']},{t:'TanStack Query',ps:['p4']},{t:'MUI Data Grid',ps:['p4']},{t:'react-window',ps:['p4']},{t:'Recharts',ps:['p2']},{t:'Tailwind',ps:['p1','p2']},{t:'shadcn/ui',ps:['p1']},{t:'i18n',ps:['p4']} ],
-  [ {t:'Drizzle ORM',ps:['p2']},{t:'Zod',ps:['p2']},{t:'PostgreSQL',ps:['p2']},{t:'MySQL',ps:['p1']},{t:'Redis',ps:['p1','p2']},{t:'Playwright',ps:['p1','p2']},{t:'Gemini',ps:['p3']} ],
+  [ {t:'Zustand',ps:['p1','p2','p4']},{t:'TanStack Query',ps:['p4']},{t:'MUI Data Grid',ps:['p4']},{t:'react-window',ps:['p4']},{t:'Recharts',ps:['p2']},{t:'Tailwind',ps:['p1','p2']},{t:'shadcn/ui',ps:['p1']},{t:'i18n',ps:['p1','p4']} ],
+  [ {t:'Zod',ps:['p1','p2']},{t:'PostgreSQL',ps:['p2']},{t:'MySQL',ps:['p1']},{t:'Redis',ps:['p1','p2']},{t:'Playwright',ps:['p1','p2']} ],
   [ {t:'AWS',ps:['p1','p2','p4','p6']},{t:'GitHub Actions',ps:['p2']},{t:'Vercel',ps:['p4']},{t:'Cloudflare',ps:['p4']} ],
   [ {t:'모놀리식 통합',ps:['p1'],s:1},{t:'잡 큐 아키텍처',ps:['p2'],s:1},{t:'동시성',ps:['p2'],s:1},{t:'결제',ps:['p1'],s:1},{t:'크롤링',ps:['p2'],s:1},{t:'데이터 파이프라인',ps:['p3'],s:1},{t:'AI 활용',ps:['p1','p2','p3'],s:1},{t:'정렬 최적화',ps:['p4'],s:1},{t:'Rule Engine',ps:['p4'],s:1},{t:'GEO',ps:['p2'],s:1},{t:'SEO 최적화',ps:['p6'],s:1} ],
 ];
