@@ -127,6 +127,11 @@ section{scroll-margin-top:78px; padding:40px 0;}
   border-radius:999px; padding:8px 16px; white-space:nowrap; transition:.18s var(--ease);
   border:1px solid var(--accent-bd); color:var(--chip-fg); background:var(--accent-soft);}
 .chip:hover{transform:translateY(-2px); box-shadow:0 6px 16px rgba(37,99,235,.22); background:var(--accent); color:#fff;}
+/* hover 시 요소가 커서 밑에서 빠져나가 hover가 깜빡이는 현상 방지 —
+   이동폭(2~3px)보다 넉넉한 투명 hit 영역을 붙여 경계에서도 hover가 유지되게 함.
+   (pseudo는 이벤트 타겟이 안 되므로 클릭은 그대로 요소가 받음) */
+.chip,.chipres-item,.back-btn{position:relative;}
+.chip::after,.chipres-item::after,.back-btn::after{content:''; position:absolute; inset:-5px; border-radius:inherit;}
 .chip.struct{border:1px dashed var(--struct-bd); color:var(--struct); background:var(--struct-soft);}
 .chip.struct:hover{background:var(--struct); color:#fff; box-shadow:0 6px 16px rgba(13,125,118,.25);}
 .chip.on{background:var(--accent); color:#fff; box-shadow:0 6px 16px rgba(37,99,235,.22);}
@@ -153,9 +158,9 @@ section{scroll-margin-top:78px; padding:40px 0;}
 .skill-card .sc-ic svg{width:18px; height:18px;}
 .skill-card h3{font-size:17.5px; font-weight:700; margin:0;}
 .skill-card .sc-sub{font-size:14px; color:var(--ink-faint); font-family:var(--font-mono);}
-.skill-list{display:flex; flex-wrap:wrap; gap:7px; list-style:none; margin:0; padding:0;}
-.skill-list li{font-size:15px; font-weight:600; color:var(--ink); padding:6px 12px; border-radius:99px;
-  background:var(--accent-soft); border:1px solid var(--accent-bd);}
+.skill-list{display:flex; flex-direction:column; gap:9px; list-style:none; margin:0; padding:0;}
+.skill-list li{display:flex; align-items:center; gap:10px; font-size:15.5px; font-weight:600; color:var(--ink);}
+.skill-list li::before{content:''; width:5px; height:5px; border-radius:50%; background:var(--accent); flex:none;}
 
 /* ===== PROJECTS ===== */
 .proj-intro{font-size:15.5px; color:var(--ink-soft); margin:-8px 0 24px; display:flex; align-items:center; gap:8px;}
@@ -508,7 +513,7 @@ html.theme-anim,html.theme-anim *,html.theme-anim *::before,html.theme-anim *::a
 
   <!-- ===== 1. KEYWORD CHIPS ===== -->
   <section id="chips">
-    <div class="sec-head"><span class="num">1</span><h2>키워드 칩</h2><span class="en">// click → 해당 프로젝트 상세</span></div>
+    <div class="sec-head"><span class="num">1</span><h2>키워드 칩</h2><span class="en">/* click → 해당 프로젝트 상세 */</span></div>
     <div class="chipbar glass" id="chipbar"></div>
     <div class="chip-legend">
       <span><span class="lg-d"></span> 기술 스택</span>
@@ -518,13 +523,13 @@ html.theme-anim,html.theme-anim *,html.theme-anim *::before,html.theme-anim *::a
 
   <!-- ===== 2. SKILLS ===== -->
   <section id="skills">
-    <div class="sec-head"><span class="num">2</span><h2>보유 역량</h2><span class="en">// what I can do</span></div>
+    <div class="sec-head"><span class="num">2</span><h2>보유 역량</h2></div>
     <div class="skills-grid" id="skillsGrid"></div>
   </section>
 
   <!-- ===== 3. PROJECTS ===== -->
   <section id="projects">
-    <div class="sec-head"><span class="num">3</span><h2>프로젝트</h2><span class="en">// 주요 프로젝트 · 카드 클릭 → 상세 페이지</span></div>
+    <div class="sec-head"><span class="num">3</span><h2>프로젝트</h2><span class="en">/* 주요 프로젝트 · 카드 클릭 → 상세 페이지 */</span></div>
     <div id="projflow">
       <div class="proj-col" id="projCol"></div>
     </div>
@@ -532,7 +537,7 @@ html.theme-anim,html.theme-anim *,html.theme-anim *::before,html.theme-anim *::a
 
   <!-- ===== 5. CAREER ===== -->
   <section id="career">
-    <div class="sec-head"><span class="num">4</span><h2>경력</h2><span class="en">// 프론트엔드 · 설계 → 개발 → 배포</span></div>
+    <div class="sec-head"><span class="num">4</span><h2>경력</h2><span class="en">/* 프론트엔드 · 설계 → 개발 → 배포 */</span></div>
     <div class="tl" id="timeline"></div>
   </section>
 

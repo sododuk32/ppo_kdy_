@@ -102,7 +102,7 @@
     const host = $('#skillsGrid'); if(!host) return;
     host.innerHTML = window.SKILLS.map(s=>
       `<div class="skill-card glass-sm reveal">
-        <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${s.title}</h3><div class="sc-sub">// ${s.sub}</div></div></div>
+        <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${s.title}</h3><div class="sc-sub">/* ${s.sub} */</div></div></div>
         <ul class="skill-list">${s.rows.map(r=>`<li>${r.nm}</li>`).join('')}</ul>
       </div>`).join('');
   }
