@@ -137,8 +137,15 @@ section{scroll-margin-top:78px; padding:40px 0;}
 .chip.on{background:var(--accent); color:#fff; box-shadow:0 6px 16px rgba(37,99,235,.22);}
 .chip.struct.on{background:var(--struct); color:#fff;}
 /* 칩 클릭 → 매칭 프로젝트 리스트 */
-#chipResults{margin:14px 2px 0; display:flex; flex-direction:column; gap:8px;}
-#chipResults:empty{display:none;}
+/* 결과 자리를 처음부터 1칸 비워둔다 — 칩을 눌렀을 때 아래 섹션이 밀리지 않게 */
+#chipResults{margin:14px 2px 0; display:flex; flex-direction:column; gap:8px; min-height:89px;}
+#chipResults:empty::before{content:'칩을 누르면 해당 기술이 쓰인 프로젝트가 여기 표시됩니다';
+  font-family:var(--font-mono); font-size:14px; color:var(--ink-faint);
+  display:flex; align-items:center; justify-content:center; height:89px;
+  border:1px dashed var(--line); border-radius:var(--r-md); text-align:center; padding:0 12px;}
+/* 결과 등장 — fill-mode는 backwards. both를 쓰면 종료 후 transform이 고정돼 hover가 죽음 */
+@keyframes chipResIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+.chipres-h,.chipres-item{animation:chipResIn .32s var(--ease) backwards;}
 .chipres-h{font-family:var(--font-mono); font-size:14px; font-weight:700; color:var(--ink-faint); padding:2px 2px 4px;}
 .chipres-item{display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; text-align:left; cursor:pointer;
   padding:14px 18px; border-radius:var(--r-md); background:var(--glass); border:1px solid var(--line); color:var(--ink); font:inherit; transition:.15s var(--ease);}
@@ -468,6 +475,7 @@ html.theme-anim,html.theme-anim *,html.theme-anim *::before,html.theme-anim *::a
 @media(prefers-reduced-motion:reduce){
   html.theme-anim,html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{transition:none !important;}
   .tut,.tut-card,.tut-slide{transition:none !important; animation:none !important;}
+  .chipres-h,.chipres-item{animation:none !important;}
 }
 
 @media(max-width:820px){

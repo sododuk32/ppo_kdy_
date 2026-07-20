@@ -87,8 +87,8 @@
       const total=projs.length+(hasCV?1:0);
       if(!total){ res.innerHTML='<div class="chipres-h">매칭 프로젝트 없음</div>'; return; }
       res.innerHTML = `<div class="chipres-h">${ch.textContent.trim()} · ${total}건</div>`
-        + projs.map(p=>`<button class="chipres-item" data-id="${p.id}"><span class="cri-name">${p.name}</span><span class="cri-meta">${p.year}</span></button>`).join('')
-        + (hasCV?`<button class="chipres-item" data-cv="1"><span class="cri-name">경력 · 프로젝트</span><span class="cri-meta">2023–2025 · 경력 섹션 보기</span></button>`:'');
+        + projs.map((p,i)=>`<button class="chipres-item" data-id="${p.id}" style="animation-delay:${(i+1)*45}ms"><span class="cri-name">${p.name}</span><span class="cri-meta">${p.year}</span></button>`).join('')
+        + (hasCV?`<button class="chipres-item" data-cv="1" style="animation-delay:${(projs.length+1)*45}ms"><span class="cri-name">경력 · 프로젝트</span><span class="cri-meta">2023–2025 · 경력 섹션 보기</span></button>`:'');
       $$('.chipres-item',res).forEach(it=>it.addEventListener('click',()=>{
         if(it.dataset.cv){ const el=$('#career'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
         const p=(window.PROJECTS||[]).find(x=>x.id===it.dataset.id);
