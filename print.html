@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<title>곽대양 · 포트폴리오</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* ===== 인쇄용 포트폴리오 — 담담한 흑백 편집 스타일.
+        bold 없음 · 강조색 없음 · 이탤릭 없음 · 큰 글씨 · 목차 히어로 · 숫자 카드 없음.
+        내용은 portfolio-data.js 에서 읽어 요약형(프로젝트당 1P)으로 렌더. ===== */
+:root{
+  --ink:#1a1a1a; --gray:#6b7280; --line:#d4d9e0; --line-2:#e7eaef;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0; padding:0;}
+body{font-family:Pretendard,-apple-system,system-ui,sans-serif; color:var(--ink);
+  font-size:12pt; line-height:1.7; font-weight:400; background:#eef1f5;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+/* 담담하게 — 콘텐츠에 섞인 bold 도 정자 무게로 눌러 통일 */
+b,strong{font-weight:400;}
+
+.page{width:210mm; min-height:297mm; padding:20mm 17mm; margin:0 auto 10mm; background:#fff;
+  box-shadow:0 2px 14px rgba(20,30,50,.12); position:relative;}
+.page + .page{page-break-before:always;}
+
+/* ---- 표지 + 목차(히어로) ---- */
+.cover{display:flex; flex-direction:column; min-height:255mm;}
+.cover .eyebrow{font-family:var(--mono); font-size:11pt; color:var(--gray); letter-spacing:.1em;}
+.cover h1{font-size:24pt; font-weight:700; letter-spacing:-.01em; margin:7mm 0 2mm; line-height:1.2;}
+.cover .role{font-size:15pt; color:var(--gray); margin:0;}
+.cover .intro{font-size:12pt; margin:6mm 0 0; max-width:150mm; line-height:1.7;}
+.cover .contact{font-family:var(--mono); font-size:10.5pt; color:var(--gray); margin-top:5mm;}
+.toc-hero{margin-top:14mm; border-top:1px solid var(--ink); padding-top:7mm;}
+.toc-hero .h{font-family:var(--mono); font-size:11pt; color:var(--gray); margin:0 0 5mm; letter-spacing:.02em;}
+.toc-hero ol{margin:0; padding:0; list-style:none; counter-reset:t;}
+.toc-hero li{counter-increment:t; display:flex; align-items:baseline; gap:5mm;
+  padding:3.2mm 0; border-bottom:1px solid var(--line-2);}
+.toc-hero li::before{content:counter(t,decimal-leading-zero); font-family:var(--mono);
+  font-size:12pt; color:var(--gray); flex:none; width:10mm;}
+.toc-hero .nm{font-size:14pt; font-weight:700;}
+.toc-hero .yr{font-family:var(--mono); font-size:10.5pt; color:var(--gray); margin-left:auto;}
+.cover .edu-line{font-size:10.5pt; color:var(--gray); margin-top:auto; padding-top:8mm;}
+
+/* ---- 섹션 공통 ---- */
+.sec-t{font-size:14pt; font-weight:700; margin:0 0 1mm; padding-bottom:2.6mm; border-bottom:1px solid var(--ink);}
+.sec-t .en{font-family:var(--mono); font-size:10pt; font-weight:400; color:var(--gray); margin-left:3mm;}
+.sub-t{font-size:14pt; font-weight:700; margin:6mm 0 2mm; padding-left:2.6mm; border-left:2px solid var(--ink);}
+.intro-p{font-size:11.5pt; line-height:1.75; margin:3mm 0 0;}
+
+/* ---- 경력 ---- */
+.career{margin-top:4mm;}
+.c-item{padding:3mm 0; border-top:1px solid var(--line-2);}
+.c-item:first-child{border-top:0;}
+.c-head{font-size:14pt; font-weight:700;}
+.c-head .role{font-size:11pt; font-weight:400; color:var(--gray); margin-left:2.5mm;}
+.c-head .yr{font-family:var(--mono); font-size:10pt; font-weight:400; color:var(--gray); margin-left:2.5mm;}
+.c-desc{font-size:11.5pt; color:var(--ink); line-height:1.72; margin:2mm 0 0;}
+.c-duties{font-size:10.5pt; color:var(--gray); margin:1.6mm 0 0;}
+
+/* ---- 역량 ---- */
+.skills{display:grid; grid-template-columns:1fr 1fr; gap:7mm; margin-top:4mm;}
+.skill-card h3{font-size:14pt; font-weight:700; margin:0 0 1mm;}
+.skill-card .cap{font-family:var(--mono); font-size:9.5pt; color:var(--gray); margin-bottom:2.5mm;}
+.skill-card ul{margin:0; padding:0; list-style:none;}
+.skill-card li{font-size:11.5pt; padding:1.4mm 0; display:flex; gap:2.6mm; align-items:baseline;}
+.skill-card li::before{content:'·'; color:var(--gray); flex:none;}
+.skill-card li .sk-note{color:var(--gray);}
+
+/* ---- 프로젝트 ---- */
+/* 프로젝트 — 좌: 메타 사이드바 / 우: 내용 (2단 배치) */
+.proj{display:grid; grid-template-columns:46mm 1fr; gap:5mm; align-items:start;}
+.ps-name{font-size:12pt; font-weight:700; line-height:1.35;}
+.ps-year{font-family:var(--mono); font-size:10pt; color:var(--gray); margin-top:1.6mm;}
+.ps-meta{font-size:10pt; color:var(--gray); margin-top:2.4mm; line-height:1.5;}
+.ps-stack{font-size:9.5pt; color:var(--gray); margin-top:4mm; line-height:1.65;}
+.proj-main{min-width:0;}
+.pm-tagline{font-size:12.5pt; line-height:1.55; margin:0 0 4mm; padding-bottom:3mm; border-bottom:1px solid var(--line-2);}
+.about{margin-top:3mm;}
+.about .row{display:grid; grid-template-columns:22mm 1fr; gap:5mm; padding:2.6mm 0; border-top:1px solid var(--line-2);}
+.about .row:first-child{border-top:0;}
+.about .k{font-family:var(--mono); font-size:9.5pt; color:var(--gray); padding-top:.8mm;}
+.about .v{font-size:11.5pt; line-height:1.72;}
+.wbrief{margin:2mm 0 0; padding:0; list-style:none;}
+.wbrief li{padding:2mm 0; border-top:1px solid var(--line-2); line-height:1.66; font-size:11.5pt;}
+.wbrief li:first-child{border-top:0;}
+.wbrief .wt{color:var(--ink);}
+.wbrief .wb{color:var(--gray);}
+
+/* 주요 작업 — 제목 + brief + 상세 몇 줄 (한 줄 요약보다 길게) */
+.worklist{margin:2mm 0 0;}
+.witem{padding:2.8mm 0; border-top:1px solid var(--line-2);}
+.witem:first-child{border-top:0;}
+.witem .wt{font-size:12pt; font-weight:700;}
+.witem .wb{font-size:11.5pt; margin-top:.8mm; line-height:1.68;}
+.wd{margin:1.4mm 0 0 0; padding-left:5mm; list-style:none;}
+.wd li{position:relative; padding:.5mm 0; font-size:11pt; color:var(--gray); line-height:1.62;}
+.wd li::before{content:'·'; position:absolute; left:-3.2mm;}
+
+/* ---- 화면 전용 안내 (인쇄에서는 사라짐) ---- */
+.howto{max-width:210mm; margin:8mm auto; padding:6mm 8mm; background:#fff; border:1px solid var(--line);
+  border-radius:3mm; font-size:11.5pt; color:var(--ink); line-height:1.75;}
+.howto code{font-family:var(--mono); background:#f2f4f8; padding:.5mm 1.6mm; border-radius:1mm;}
+
+@media print{
+  body{background:#fff;}
+  .page{box-shadow:none; margin:0; width:auto; min-height:0; padding:0;}
+  .howto{display:none;}
+  @page{size:A4; margin:18mm 15mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="howto">
+  PDF로 저장: <code>Ctrl+P</code> → 대상 <b>“PDF로 저장”</b> → 추가 설정 <b>“배경 그래픽” 체크</b> · 용지 A4 · 여백 기본.
+  이 안내 박스는 인쇄물에는 나오지 않습니다.
+</div>
+
+<div id="doc"></div>
+
+<script src="portfolio-data.js"></script>
+<script>
+(function(){
+  /* 연락처 — 공개 가능(이미 제출 이력). 인쇄용 포폴이므로 포트폴리오 URL 포함. */
+  var PROFILE = {
+    name:'곽대양',
+    role:'Software Engineer · 프론트엔드',
+    intro:'',                              /* 한 줄 소개 — 인쇄용 내용 받으면 채움 */
+    summary:'',                            /* 자기소개 문단 — 인쇄용 내용 받으면 채움 */
+    phone:'010-8011-8429',
+    email:'sododuk63@gmail.com',           /* 확인 필요 */
+    github:'github.com/sododuk32',
+    site:'sododuk32.github.io/ppo_kdy_',
+    edu:'동의대학교 컴퓨터공학과 · 2013 – 2021.02 졸업',
+    activities:[]                          /* 외부활동 — 인쇄용 내용 받으면 채움 */
+  };
+
+  var esc = function(s){ return String(s==null?'':s); };
+  var arr = function(v){ return v==null ? [] : (Array.isArray(v)?v:[v]); };
+
+  /* ---- 표지 + 목차(히어로) ---- */
+  function cover(){
+    var toc = (window.PROJECTS||[]).map(function(p){
+      return '<li><span class="nm">'+esc(p.name)+'</span><span class="yr">'+esc(p.year)+'</span></li>';
+    }).join('');
+    var contact = [PROFILE.phone, PROFILE.email, PROFILE.github, PROFILE.site]
+      .filter(Boolean).join('   ·   ');
+    return '<div class="page cover">'+
+      '<div class="eyebrow">PORTFOLIO</div>'+
+      '<h1>'+esc(PROFILE.name)+'</h1>'+
+      '<p class="role">'+esc(PROFILE.role)+'</p>'+
+      (PROFILE.intro?'<p class="intro">'+esc(PROFILE.intro)+'</p>':'')+
+      '<div class="contact">'+contact+'</div>'+
+      '<div class="toc-hero"><p class="h">/* 수록 프로젝트 */</p><ol>'+toc+'</ol></div>'+
+      (PROFILE.edu?'<div class="edu-line">'+esc(PROFILE.edu)+'</div>':'')+
+    '</div>';
+  }
+
+  /* ---- 자기소개 · 경력 · 역량 · 외부활동 ---- */
+  function intro(){
+    if(!PROFILE.summary) return '';
+    return '<h2 class="sec-t">자기소개<span class="en">/* about me */</span></h2>'+
+      '<p class="intro-p">'+esc(PROFILE.summary)+'</p>';
+  }
+  function careerBlock(){
+    var items = (window.CAREER||[]).map(function(c){
+      var duties = (c.duties||[]).join(' · ');
+      return '<div class="c-item"><div class="c-head">'+esc(c.co)+
+        '<span class="role">'+esc(c.role)+'</span><span class="yr">'+esc(c.yr)+'</span></div>'+
+        (c.desc?'<p class="c-desc">'+esc(c.desc)+'</p>':'')+
+        (duties?'<div class="c-duties">'+esc(duties)+'</div>':'')+'</div>';
+    }).join('');
+    return '<h2 class="sec-t" style="margin-top:12mm">경력<span class="en">/* career */</span></h2>'+
+      '<div class="career">'+items+'</div>';
+  }
+  function skillsBlock(){
+    var cards = (window.SKILLS||[]).map(function(s){
+      var rows = (s.rows||[]).map(function(r){
+        return '<li>'+esc(r.nm)+(r.note?' <span class="sk-note">— '+esc(r.note)+'</span>':'')+'</li>';
+      }).join('');
+      return '<div class="skill-card"><h3>'+esc(s.title)+'</h3>'+
+        '<div class="cap">/* '+esc(s.sub)+' */</div><ul>'+rows+'</ul></div>';
+    }).join('');
+    return '<h2 class="sec-t" style="margin-top:12mm">보유 역량<span class="en">/* skills */</span></h2>'+
+      '<div class="skills">'+cards+'</div>';
+  }
+  function activitiesBlock(){
+    if(!(PROFILE.activities||[]).length) return '';
+    var items = PROFILE.activities.map(function(a){ return '<li>'+esc(a)+'</li>'; }).join('');
+    return '<h2 class="sec-t" style="margin-top:12mm">외부활동<span class="en">/* activities */</span></h2>'+
+      '<ul class="wbrief">'+items+'</ul>';
+  }
+  function page2(){
+    return '<div class="page">'+ intro() + careerBlock() + skillsBlock() + activitiesBlock() +'</div>';
+  }
+
+  /* ---- 프로젝트 1개 = 새 페이지 · 2단 배치 (좌: 메타 / 우: 소개 + 주요 작업) ---- */
+  function project(p, idx){
+    var a = p.about||{}, m = a.meta||{};
+
+    var side = '<div class="proj-side">'+
+      '<div class="ps-name">'+(idx+1)+'. '+esc(p.name)+'</div>'+
+      (p.year?'<div class="ps-year">'+esc(p.year)+'</div>':'')+
+      (m.period?'<div class="ps-meta">기간 · '+esc(m.period)+'</div>':'')+
+      (m.team?'<div class="ps-meta">팀 · '+esc(m.team)+'</div>':'')+
+      (m.client?'<div class="ps-meta">대상 · '+esc(m.client)+'</div>':'')+
+      (p.struct?'<div class="ps-meta">구조 · '+esc(p.struct)+'</div>':'')+
+      ((p.stack||[]).length?'<div class="ps-stack">스택 · '+p.stack.map(esc).join(' · ')+'</div>':'')+
+    '</div>';
+
+    var aboutRows = [['what','무엇을'],['problem','왜'],['role','내 역할'],['outcome','결과']]
+      .filter(function(kv){ return a[kv[0]]; })
+      .map(function(kv){ return '<div class="row"><div class="k">'+kv[1]+'</div><div class="v">'+esc(a[kv[0]])+'</div></div>'; })
+      .join('');
+
+    var main = '<div class="proj-main">';
+    if(a.tagline) main += '<div class="pm-tagline">'+esc(a.tagline)+'</div>';
+    if(aboutRows) main += '<h3 class="sub-t" style="margin-top:0">프로젝트 소개</h3><div class="about">'+aboutRows+'</div>';
+
+    /* 주요 작업 — 제목 + brief + 상세 최대 3줄. 도면·전체 detail은 웹에서. */
+    var works = (p.work||[]).filter(function(w){ return w && typeof w==='object'; });
+    if(works.length){
+      main += '<h3 class="sub-t"'+(aboutRows?'':' style="margin-top:0"')+'>주요 작업</h3><div class="worklist">';
+      works.forEach(function(w){
+        main += '<div class="witem"><div class="wt">'+esc(w.title)+'</div>';
+        if(w.brief) main += '<div class="wb">'+esc(w.brief)+'</div>';
+        var lines = [];
+        if(w.detail) lines = arr(w.detail);
+        else if(w.sections) (w.sections||[]).forEach(function(s){ (s.items||[]).forEach(function(it){ lines.push(it); }); });
+        lines = lines.slice(0,3);
+        if(lines.length) main += '<ul class="wd">'+lines.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+        main += '</div>';
+      });
+      main += '</div>';
+    }
+    main += '</div>';
+
+    return '<div class="page proj">'+side+main+'</div>';
+  }
+
+  var html = cover() + page2();
+  (window.PROJECTS||[]).forEach(function(p,i){ html += project(p,i); });
+  document.getElementById('doc').innerHTML = html;
+})();
+</script>
+</body></html>
