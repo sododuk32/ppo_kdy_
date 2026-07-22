@@ -47,7 +47,7 @@ b,strong{font-weight:400;}
 /* ---- 섹션 공통 ---- */
 .sec-t{font-size:14pt; font-weight:700; margin:0 0 1mm; padding-bottom:2.6mm; border-bottom:1px solid var(--ink);}
 .sec-t .en{font-family:var(--mono); font-size:10pt; font-weight:400; color:var(--gray); margin-left:3mm;}
-.sub-t{font-size:14pt; font-weight:700; margin:6mm 0 2mm; padding-left:2.6mm; border-left:2px solid var(--ink);}
+.sub-t{font-size:14pt; font-weight:700; margin:8mm 0 3mm; padding-left:2.6mm; border-left:2px solid var(--ink);}
 .intro-p{font-size:11.5pt; line-height:1.75; margin:3mm 0 0;}
 
 /* ---- 경력 ---- */
@@ -61,7 +61,7 @@ b,strong{font-weight:400;}
 .c-duties{font-size:10.5pt; color:var(--gray); margin:1.6mm 0 0;}
 
 /* ---- 역량 ---- */
-.skills{display:grid; grid-template-columns:1fr 1fr; gap:7mm; margin-top:4mm;}
+.skills{display:grid; grid-template-columns:1fr; gap:5mm; margin-top:4mm;}
 .skill-card h3{font-size:14pt; font-weight:700; margin:0 0 1mm;}
 .skill-card .cap{font-family:var(--mono); font-size:9.5pt; color:var(--gray); margin-bottom:2.5mm;}
 .skill-card ul{margin:0; padding:0; list-style:none;}
@@ -70,16 +70,17 @@ b,strong{font-weight:400;}
 .skill-card li .sk-note{color:var(--gray);}
 
 /* ---- 프로젝트 ---- */
-/* 프로젝트 — 좌: 메타 사이드바 / 우: 내용 (2단 배치) */
-.proj{display:grid; grid-template-columns:46mm 1fr; gap:5mm; align-items:start;}
-.ps-name{font-size:12pt; font-weight:700; line-height:1.35;}
-.ps-year{font-family:var(--mono); font-size:10pt; color:var(--gray); margin-top:1.6mm;}
-.ps-meta{font-size:10pt; color:var(--gray); margin-top:2.4mm; line-height:1.5;}
-.ps-stack{font-size:9.5pt; color:var(--gray); margin-top:4mm; line-height:1.65;}
+/* 프로젝트 — 상하 배치 (헤더: 메타 / 본문: 소개+작업) */
+.proj{display:block;}
+.proj-side{padding-bottom:5mm; margin-bottom:8mm; border-bottom:1px solid var(--line);}
+.ps-name{font-size:15pt; font-weight:700; line-height:1.3;}
+.ps-year{font-family:var(--mono); font-size:10pt; color:var(--gray); margin-top:1.8mm;}
+.ps-meta{font-size:10.5pt; color:var(--gray); margin-top:3mm; line-height:1.6;}
+.ps-stack{font-size:10pt; color:var(--gray); margin-top:4.5mm; line-height:1.7;}
 .proj-main{min-width:0;}
-.pm-tagline{font-size:12.5pt; line-height:1.55; margin:0 0 4mm; padding-bottom:3mm; border-bottom:1px solid var(--line-2);}
+.pm-tagline{font-size:13pt; line-height:1.65; margin:0 0 7mm;}
 .about{margin-top:3mm;}
-.about .row{display:grid; grid-template-columns:22mm 1fr; gap:5mm; padding:2.6mm 0; border-top:1px solid var(--line-2);}
+.about .row{display:grid; grid-template-columns:22mm 1fr; gap:6mm; padding:3.4mm 0; border-top:1px solid var(--line-2);}
 .about .row:first-child{border-top:0;}
 .about .k{font-family:var(--mono); font-size:9.5pt; color:var(--gray); padding-top:.8mm;}
 .about .v{font-size:11.5pt; line-height:1.72;}
@@ -91,7 +92,7 @@ b,strong{font-weight:400;}
 
 /* 주요 작업 — 제목 + brief + 상세 몇 줄 (한 줄 요약보다 길게) */
 .worklist{margin:2mm 0 0;}
-.witem{padding:2.8mm 0; border-top:1px solid var(--line-2);}
+.witem{padding:4mm 0; border-top:1px solid var(--line-2);}
 .witem:first-child{border-top:0;}
 .witem .wt{font-size:12pt; font-weight:700;}
 .witem .wb{font-size:11.5pt; margin-top:.8mm; line-height:1.68;}
@@ -146,8 +147,12 @@ b,strong{font-weight:400;}
     var toc = (window.PROJECTS||[]).map(function(p){
       return '<li><span class="nm">'+esc(p.name)+'</span><span class="yr">'+esc(p.year)+'</span></li>';
     }).join('');
-    var contact = [PROFILE.phone, PROFILE.email, PROFILE.github, PROFILE.site]
-      .filter(Boolean).join('   ·   ');
+    var contact = [
+      PROFILE.phone,
+      PROFILE.email,
+      PROFILE.github ? 'GitHub  ' + PROFILE.github : '',
+      PROFILE.site ? '웹 포트폴리오  ' + PROFILE.site : ''
+    ].filter(Boolean).join('   ·   ');
     return '<div class="page cover">'+
       '<div class="eyebrow">PORTFOLIO</div>'+
       '<h1>'+esc(PROFILE.name)+'</h1>'+
