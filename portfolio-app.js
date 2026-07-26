@@ -104,7 +104,7 @@
   function renderSkills(){
     const host = $('#skillsGrid'); if(!host) return;
     host.innerHTML = window.SKILLS.map(s=>
-      `<div class="skill-card glass-sm reveal">
+      `<div class="skill-card glass-sm reveal${s.sub!=='frontend'?' sk-secondary':''}">
         <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${s.title}</h3></div></div>
         <ul class="skill-list">${s.rows.map(r=>`<li>${r.nm}</li>`).join('')}</ul>
       </div>`).join('');
