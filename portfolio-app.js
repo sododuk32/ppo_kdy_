@@ -83,14 +83,17 @@
       ch.classList.add('on');
       const ids=(ch.dataset.ps||'').split(',').filter(Boolean);
       const projs=ids.map(id=>(window.PROJECTS||[]).find(x=>x.id===id)).filter(Boolean);
+      const sides=ids.map(id=>(window.SIDE_PROJECTS||[]).find(x=>x.id===id)).filter(Boolean);
       const hasCV=ids.includes('cv');
-      const total=projs.length+(hasCV?1:0);
+      const total=projs.length+sides.length+(hasCV?1:0);
       if(!total){ res.innerHTML='<div class="chipres-h">매칭 프로젝트 없음</div>'; return; }
       res.innerHTML = `<div class="chipres-h">${ch.textContent.trim()} · ${total}건</div>`
         + projs.map((p,i)=>`<button class="chipres-item" data-id="${p.id}" style="animation-delay:${(i+1)*45}ms"><span class="cri-name">${p.name}</span><span class="cri-meta">${p.year}</span></button>`).join('')
-        + (hasCV?`<button class="chipres-item" data-cv="1" style="animation-delay:${(projs.length+1)*45}ms"><span class="cri-name">경력 · 프로젝트</span><span class="cri-meta">2023–2025 · 경력 섹션 보기</span></button>`:'');
+        + sides.map((p,i)=>`<button class="chipres-item" data-side="${p.id}" style="animation-delay:${(projs.length+i+1)*45}ms"><span class="cri-name">${p.name}</span><span class="cri-meta">개인 프로젝트 · ${p.year}</span></button>`).join('')
+        + (hasCV?`<button class="chipres-item" data-cv="1" style="animation-delay:${(projs.length+sides.length+1)*45}ms"><span class="cri-name">경력</span><span class="cri-meta">2023–2026 · 경력 섹션 보기</span></button>`:'');
       $$('.chipres-item',res).forEach(it=>it.addEventListener('click',()=>{
         if(it.dataset.cv){ const el=$('#career'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
+        if(it.dataset.side){ const el=$('#side'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
         const p=(window.PROJECTS||[]).find(x=>x.id===it.dataset.id);
         if(p) openDetail(p);
       }));
@@ -102,7 +105,7 @@
     const host = $('#skillsGrid'); if(!host) return;
     host.innerHTML = window.SKILLS.map(s=>
       `<div class="skill-card glass-sm reveal">
-        <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${s.title}</h3><div class="sc-sub">/* ${s.sub} */</div></div></div>
+        <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${s.title}</h3></div></div>
         <ul class="skill-list">${s.rows.map(r=>`<li>${r.nm}</li>`).join('')}</ul>
       </div>`).join('');
   }
@@ -159,6 +162,26 @@
       if(p) openDetail(p);
     }));
     requestAnimationFrame(drawFlow); setTimeout(drawFlow,250);
+  }
+
+  // ---------- render: side projects (개인 프로젝트) ----------
+  function renderSideProjects(){
+    const col = $('#sideCol'); if(!col) return;
+    col.innerHTML = (window.SIDE_PROJECTS||[]).map(p=>{
+      const stk = (p.stack||[]).map(s=>`<span class="stk">${s}</span>`).join('');
+      const pts = (p.points||[]).map(t=>`<li>${t}</li>`).join('');
+      const repos = p.repos || (p.repo?[{l:'저장소', u:p.repo}]:[]);
+      const repo = repos.length ? `<div class="repo-row">${repos.map(r=>`<a class="repo-link" href="${r.u}" target="_blank" rel="noopener">${r.l} · GitHub →</a>`).join('')}</div>` : '';
+      return `<div class="pcard glass reveal spcard">
+        <div class="ptop"><div><span class="pname">${p.name}</span></div><span class="pyear">${p.year}</span></div>
+        ${p.tagline?`<div class="ptag">${p.tagline}</div>`:''}
+        <div class="psum">${p.summary}</div>
+        <div class="lbl">기술 스택</div><div class="stack">${stk}</div>
+        ${pts?`<div class="lbl">핵심</div><ul class="side-points">${pts}</ul>`:''}
+        ${p.img?`<div class="lbl">아키텍처</div><figure class="shot side-fig"><img src="${p.img}" alt="아키텍처 구성도" loading="lazy"><figcaption>${p.imgCap||'전체 아키텍처 구성도'}</figcaption></figure>`:''}
+        ${repo}
+      </div>`;
+    }).join('');
   }
 
   // ---------- render: research (기술 연구) ----------
@@ -451,7 +474,7 @@
   function initReveal(){}
 
   // ---------- init ----------
-  renderChips(); renderSkills(); renderProjects(); renderTimeline(); renderWays();
+  renderChips(); renderSkills(); renderProjects(); renderSideProjects(); renderTimeline(); renderWays();
   initReveal();
   // 다이어그램 가로 스크롤러(.diag-scroll)가 세로 휠을 삼켜 depth-3 페이지 스크롤이 막히는 문제 방지 —
   // 세로 휠은 상세 페이지(또는 문서)로 넘기고, 가로 의도만 다이어그램이 처리하게 함

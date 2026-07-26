@@ -26,6 +26,10 @@ jobs:
       # (Settings → Pages → Source = GitHub Actions)
       # GITHUB_TOKEN 으로는 사이트 생성 API 호출 불가 → enablement 옵션 사용 안 함
       - uses: actions/configure-pages@v5
+      # 풀버전 백업은 git에는 두되 공개 사이트에는 노출하지 않는다.
+      # (러너 작업본에서만 제거 → 아티팩트/배포 URL에서 빠짐, 저장소 이력엔 남음)
+      - name: Exclude full-version backup from published site
+        run: rm -f index-full.html print-full.html portfolio-data-full.js
       - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
