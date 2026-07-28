@@ -106,7 +106,7 @@
     host.innerHTML = window.SKILLS.map(s=>
       `<div class="skill-card glass-sm reveal${s.sub!=='frontend'?' sk-secondary':''}">
         <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${s.title}</h3></div></div>
-        <ul class="skill-list">${s.rows.map(r=>`<li>${r.nm}</li>`).join('')}</ul>
+        <ul class="skill-list">${s.rows.map(r=>`<li><span class="sk-body"><span class="sk-nm">${r.nm}</span>${r.note?`<span class="sk-note2">${r.note}</span>`:''}</span></li>`).join('')}</ul>
       </div>`).join('');
   }
 
@@ -167,17 +167,23 @@
   // ---------- render: side projects (개인 프로젝트) ----------
   function renderSideProjects(){
     const col = $('#sideCol'); if(!col) return;
+    const sfield = (label,cls,val) => {
+      const items = Array.isArray(val) ? val.filter(Boolean) : (val?[val]:[]);
+      if(!items.length) return '';
+      const body = items.length===1 ? `<p>${items[0]}</p>` : `<ul class="dolist">${items.map(t=>`<li>${t}</li>`).join('')}</ul>`;
+      return `<div class="wf"><span class="wfl ${cls}">${label}</span>${body}</div>`;
+    };
     col.innerHTML = (window.SIDE_PROJECTS||[]).map(p=>{
       const stk = (p.stack||[]).map(s=>`<span class="stk">${s}</span>`).join('');
-      const pts = (p.points||[]).map(t=>`<li>${t}</li>`).join('');
+      const flow = sfield('배경','bg',p.background)+sfield('해결','sol',p.solution)+sfield('결과','res',p.result)+sfield('회고','retro',p.retro);
       const repos = p.repos || (p.repo?[{l:'저장소', u:p.repo}]:[]);
       const repo = repos.length ? `<div class="repo-row">${repos.map(r=>`<a class="repo-link" href="${r.u}" target="_blank" rel="noopener">${r.l} · GitHub →</a>`).join('')}</div>` : '';
       return `<div class="pcard glass reveal spcard">
         <div class="ptop"><div><span class="pname">${p.name}</span></div><span class="pyear">${p.year}</span></div>
         ${p.tagline?`<div class="ptag">${p.tagline}</div>`:''}
-        <div class="psum">${p.summary}</div>
+        ${p.summary?`<div class="psum">${p.summary}</div>`:''}
         <div class="lbl">기술 스택</div><div class="stack">${stk}</div>
-        ${pts?`<div class="lbl">핵심</div><ul class="side-points">${pts}</ul>`:''}
+        ${flow?`<div class="side-flow">${flow}</div>`:''}
         ${p.img?`<div class="lbl">아키텍처</div><figure class="shot side-fig"><img src="${p.img}" alt="아키텍처 구성도" loading="lazy"><figcaption>${p.imgCap||'전체 아키텍처 구성도'}</figcaption></figure>`:''}
         ${repo}
       </div>`;
@@ -314,6 +320,9 @@
       const figs = (isObj && w.figures) ? w.figures : [];
       const briefHtml = brief ? `<p class="wi-brief">${brief}</p>` : '';
       const bgHtml = field('배경','bg',bg);
+      const solHtml = field('해결','sol',isObj?w.solution:'');
+      const resHtml = field('결과','res',isObj?w.result:'');
+      const retroHtml = field('회고','retro',isObj?w.retro:'');
       const doHtml = field('한 일','do',dos);
       const figHtml = figs.map((f,j)=>{
         const fid=p.id+'~wfig-'+i+'-'+j;
@@ -330,8 +339,8 @@
       const shots = (isObj && w.shots) ? w.shots : [];
       const shotHtml = shots.length ? `<div class="shotrow">${shots.map(s=>`<figure class="shot"><img src="${s.src}" alt="${(s.cap||'').replace(/"/g,'&quot;')}" loading="lazy"><figcaption>${s.cap||''}</figcaption></figure>`).join('')}</div>` : '';
       let expand = '';
-      if(bgHtml||doHtml||secHtml||figWrap||shotHtml){
-        expand = `<div class="d4toggle"><span class="car">▸</span> 세부 보기</div><div class="d4">${bgHtml}${doHtml}${secHtml}${figWrap}${shotHtml}</div>`;
+      if(bgHtml||solHtml||resHtml||retroHtml||doHtml||secHtml||figWrap||shotHtml){
+        expand = `<div class="d4toggle"><span class="car">▸</span> 세부 보기</div><div class="d4">${bgHtml}${solHtml}${figWrap}${resHtml}${retroHtml}${doHtml}${secHtml}${shotHtml}</div>`;
       }
       return `<div class="witem"><div class="wi-h"><span class="wn">${i+1}</span><span class="wt">${title}</span>${tagHtml}</div>${briefHtml}${expand}</div>`;
     }).join('')}</div>`;
