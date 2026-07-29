@@ -3,6 +3,9 @@
   'use strict';
   const $ = (s,r=document)=>r.querySelector(s);
   const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+  // i18n 단축 — t: UI 라벨, tr: 콘텐츠 값({ko,ja} 폴백)
+  const t = (k)=>window.I18N.t(k);
+  const tr = (v)=>window.I18N.tr(v);
 
   const ICONS = {
     mono:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
@@ -15,8 +18,8 @@
   // ---------- node-edge diagram ----------
   function diagramHTML(p){
     if(!p.nodes || !p.nodes.length) return '';
-    const zones = (p.zones||[]).map(z=>`<div class="dzone" style="left:${z.x}%;top:${z.y}%;width:${z.w}%;height:${z.h}%"><span class="dzone-l">${z.label}</span></div>`).join('');
-    const nodes = p.nodes.map(n=>`<div class="node ${n.t||''}" data-nx="${n.x}" data-ny="${n.y}" style="left:${n.x}%;top:${n.y}%"><span class="nd"></span>${n.l}</div>`).join('');
+    const zones = (p.zones||[]).map(z=>`<div class="dzone" style="left:${z.x}%;top:${z.y}%;width:${z.w}%;height:${z.h}%"><span class="dzone-l">${tr(z.label)}</span></div>`).join('');
+    const nodes = p.nodes.map(n=>`<div class="node ${n.t||''}" data-nx="${n.x}" data-ny="${n.y}" style="left:${n.x}%;top:${n.y}%"><span class="nd"></span>${tr(n.l)}</div>`).join('');
     return `<div class="dgrid"></div>${zones}<svg class="dsvg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><defs><marker id="da-${p.id}" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto-start-reverse"><path d="M0,0 L8,4.5 L0,9 z" fill="var(--accent)"/></marker></defs></svg>${nodes}`;
   }
   function drawDiagramEdges(box, p){
@@ -29,7 +32,7 @@
     p.edges.forEach(e=>{
       const a=e[0], b=e[1], opt=e[2];
       const bi = opt==='bi' || (opt && opt.bi);
-      const label = (opt && typeof opt==='object' && opt.label) ? opt.label : '';
+      const label = (opt && typeof opt==='object' && opt.label) ? tr(opt.label) : '';
       const [ax,ay]=center(a), [bx,by]=center(b);
       const dx=(bx-ax)*0.5;
       const d=`M ${ax} ${ay} C ${ax+dx} ${ay}, ${bx-dx} ${by}, ${bx} ${by}`;
@@ -72,12 +75,13 @@
     const host = $('#chipbar'); if(!host) return;
     host.innerHTML = window.CHIPS.map(row=>
       '<div class="chiprow">'+row.map(c=>
-        `<span class="chip ${c.s?'struct':''}" data-ps="${(c.ps||[]).join(',')}">${c.t}</span>`
+        `<span class="chip ${c.s?'struct':''}" data-ps="${(c.ps||[]).join(',')}">${tr(c.t)}</span>`
       ).join('')+'</div>'
     ).join('');
     let res = $('#chipResults');
     if(!res){ res=document.createElement('div'); res.id='chipResults'; host.parentNode.insertBefore(res, host.nextSibling); }
     res.innerHTML='';
+    res.setAttribute('data-empty', t('chip_empty'));
     $$('.chip',host).forEach(ch=>ch.addEventListener('click',()=>{
       $$('.chip',host).forEach(x=>x.classList.remove('on'));
       ch.classList.add('on');
@@ -86,11 +90,11 @@
       const sides=ids.map(id=>(window.SIDE_PROJECTS||[]).find(x=>x.id===id)).filter(Boolean);
       const hasCV=ids.includes('cv');
       const total=projs.length+sides.length+(hasCV?1:0);
-      if(!total){ res.innerHTML='<div class="chipres-h">매칭 프로젝트 없음</div>'; return; }
-      res.innerHTML = `<div class="chipres-h">${ch.textContent.trim()} · ${total}건</div>`
-        + projs.map((p,i)=>`<button class="chipres-item" data-id="${p.id}" style="animation-delay:${(i+1)*45}ms"><span class="cri-name">${p.name}</span><span class="cri-meta">${p.year}</span></button>`).join('')
-        + sides.map((p,i)=>`<button class="chipres-item" data-side="${p.id}" style="animation-delay:${(projs.length+i+1)*45}ms"><span class="cri-name">${p.name}</span><span class="cri-meta">개인 프로젝트 · ${p.year}</span></button>`).join('')
-        + (hasCV?`<button class="chipres-item" data-cv="1" style="animation-delay:${(projs.length+sides.length+1)*45}ms"><span class="cri-name">경력</span><span class="cri-meta">2023–2026 · 경력 섹션 보기</span></button>`:'');
+      if(!total){ res.innerHTML=`<div class="chipres-h">${t('no_match')}</div>`; return; }
+      res.innerHTML = `<div class="chipres-h">${ch.textContent.trim()} · ${total}${t('count_suffix')}</div>`
+        + projs.map((p,i)=>`<button class="chipres-item" data-id="${p.id}" style="animation-delay:${(i+1)*45}ms"><span class="cri-name">${tr(p.name)}</span><span class="cri-meta">${p.year}</span></button>`).join('')
+        + sides.map((p,i)=>`<button class="chipres-item" data-side="${p.id}" style="animation-delay:${(projs.length+i+1)*45}ms"><span class="cri-name">${tr(p.name)}</span><span class="cri-meta">${t('side_meta')} · ${p.year}</span></button>`).join('')
+        + (hasCV?`<button class="chipres-item" data-cv="1" style="animation-delay:${(projs.length+sides.length+1)*45}ms"><span class="cri-name">${t('career_item')}</span><span class="cri-meta">${t('career_item_meta')}</span></button>`:'');
       $$('.chipres-item',res).forEach(it=>it.addEventListener('click',()=>{
         if(it.dataset.cv){ const el=$('#career'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
         if(it.dataset.side){ const el=$('#side'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
@@ -105,28 +109,28 @@
     const host = $('#skillsGrid'); if(!host) return;
     host.innerHTML = window.SKILLS.map(s=>
       `<div class="skill-card glass-sm reveal${s.sub!=='frontend'?' sk-secondary':''}">
-        <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${s.title}</h3></div></div>
-        <ul class="skill-list">${s.rows.map(r=>`<li><span class="sk-body"><span class="sk-nm">${r.nm}</span>${r.note?`<span class="sk-note2">${r.note}</span>`:''}</span></li>`).join('')}</ul>
+        <div class="sc-h"><div class="sc-ic">${ICONS[s.icon]||''}</div><div><h3>${tr(s.title)}</h3></div></div>
+        <ul class="skill-list">${s.rows.map(r=>`<li><span class="sk-body"><span class="sk-nm">${tr(r.nm)}</span>${r.note?`<span class="sk-note2">${tr(r.note)}</span>`:''}</span></li>`).join('')}</ul>
       </div>`).join('');
   }
 
   // ---------- 프로젝트 소개 (about: 비기술 · 전체 설명) ----------
   const ABOUT_ROWS = [
-    ['what',    '무엇을'],
-    ['problem', '왜'],
-    ['role',    '내 역할'],
-    ['outcome', '결과'],
+    ['what',    'about_what'],
+    ['problem', 'about_problem'],
+    ['role',    'about_role'],
+    ['outcome', 'about_outcome'],
   ];
-  const ABOUT_META = [['period','기간'],['team','팀 구성'],['client','대상']];
+  const ABOUT_META = [['period','meta_period'],['team','meta_team'],['client','meta_client']];
   function aboutHTML(p){
     const a = p.about; if(!a) return '';
     const rows = ABOUT_ROWS.filter(([k])=>a[k]).map(([k,label])=>
-      `<div class="dp-about-row"><div class="dp-about-k">${label}</div><div class="dp-about-v">${a[k]}</div></div>`).join('');
+      `<div class="dp-about-row"><div class="dp-about-k">${t(label)}</div><div class="dp-about-v">${tr(a[k])}</div></div>`).join('');
     const m = a.meta||{};
-    const chips = ABOUT_META.filter(([k])=>m[k]).map(([k,label])=>`<span>${label} · ${m[k]}</span>`).join('');
+    const chips = ABOUT_META.filter(([k])=>m[k]).map(([k,label])=>`<span>${t(label)} · ${tr(m[k])}</span>`).join('');
     if(!rows && !chips) return '';
     return `<div class="dp-about">
-      <div class="dp-about-h">프로젝트 소개 <span class="fmt">overview</span></div>
+      <div class="dp-about-h">${t('about_h')} <span class="fmt">overview</span></div>
       ${rows}
       ${chips?`<div class="dp-about-meta">${chips}</div>`:''}
     </div>`;
@@ -136,19 +140,19 @@
   function renderProjects(){
     const col = $('#projCol'); if(!col) return;
     col.innerHTML = window.PROJECTS.map(p=>{
-      const stk = p.stack.map(s=>`<span class="stk">${s}</span>`).join('');
+      const stk = p.stack.map(s=>`<span class="stk">${tr(s)}</span>`).join('');
       const subTitles = (p.work||[]).map(w=>(w&&typeof w==='object')?w.title:w);
-      const subs = subTitles.map(t=>`<li>${t}<span class="ar">›</span></li>`).join('');
+      const subs = subTitles.map(x=>`<li>${tr(x)}<span class="ar">›</span></li>`).join('');
       return `<div class="pcard glass reveal" data-id="${p.id}">
-        <div class="ptop"><div><span class="pname">${p.name}</span></div><span class="pyear">${p.year}</span></div>
-        ${(p.about&&p.about.tagline)?`<div class="ptag">${p.about.tagline}</div>`:''}
-        <div class="psum">${p.summary}</div>
-        <div class="lbl">기술 스택</div><div class="stack">${stk}</div>
-        ${(p.nodes&&p.nodes.length)?`<div class="lbl">아키텍처</div>
+        <div class="ptop"><div><span class="pname">${tr(p.name)}</span></div><span class="pyear">${p.year}</span></div>
+        ${(p.about&&p.about.tagline)?`<div class="ptag">${tr(p.about.tagline)}</div>`:''}
+        <div class="psum">${tr(p.summary)}</div>
+        <div class="lbl">${t('stack_lbl')}</div><div class="stack">${stk}</div>
+        ${(p.nodes&&p.nodes.length)?`<div class="lbl">${t('arch_lbl')}</div>
         <div class="diag-scroll"><div class="diag-box" data-id="${p.id}">${diagramHTML(p)}</div></div>`:''}
-        <div class="lbl">세부 항목 <span style="font-family:var(--font-mono);color:var(--ink-faint);text-transform:none;letter-spacing:0">· 제목만</span></div>
+        <div class="lbl">${t('items_lbl')} <span style="font-family:var(--font-mono);color:var(--ink-faint);text-transform:none;letter-spacing:0">${t('items_hint')}</span></div>
         <ul class="sublist">${subs}</ul>
-        <div class="open-cue">상세 페이지 열기 <span class="ar">→</span></div>
+        <div class="open-cue">${t('open_cue')} <span class="ar">→</span></div>
       </div>`;
     }).join('');
     // draw card diagrams
@@ -168,23 +172,25 @@
   function renderSideProjects(){
     const col = $('#sideCol'); if(!col) return;
     const sfield = (label,cls,val) => {
-      const items = Array.isArray(val) ? val.filter(Boolean) : (val?[val]:[]);
+      const rv = tr(val);
+      const items = Array.isArray(rv) ? rv.filter(Boolean) : (rv?[rv]:[]);
       if(!items.length) return '';
-      const body = items.length===1 ? `<p>${items[0]}</p>` : `<ul class="dolist">${items.map(t=>`<li>${t}</li>`).join('')}</ul>`;
+      const body = items.length===1 ? `<p>${items[0]}</p>` : `<ul class="dolist">${items.map(x=>`<li>${x}</li>`).join('')}</ul>`;
       return `<div class="wf"><span class="wfl ${cls}">${label}</span>${body}</div>`;
     };
     col.innerHTML = (window.SIDE_PROJECTS||[]).map(p=>{
-      const stk = (p.stack||[]).map(s=>`<span class="stk">${s}</span>`).join('');
-      const flow = sfield('배경','bg',p.background)+sfield('해결','sol',p.solution)+sfield('결과','res',p.result)+sfield('회고','retro',p.retro);
-      const repos = p.repos || (p.repo?[{l:'저장소', u:p.repo}]:[]);
-      const repo = repos.length ? `<div class="repo-row">${repos.map(r=>`<a class="repo-link" href="${r.u}" target="_blank" rel="noopener">${r.l} · GitHub →</a>`).join('')}</div>` : '';
+      const stk = (p.stack||[]).map(s=>`<span class="stk">${tr(s)}</span>`).join('');
+      const flow = sfield(t('f_bg'),'bg',p.background)+sfield(t('f_sol'),'sol',p.solution)+sfield(t('f_res'),'res',p.result)+sfield(t('f_retro'),'retro',p.retro);
+      const repos = p.repos || (p.repo?[{l:{ko:'저장소',ja:'リポジトリ'}, u:p.repo}]:[]);
+      const repo = repos.length ? `<div class="repo-row">${repos.map(r=>`<a class="repo-link" href="${r.u}" target="_blank" rel="noopener">${tr(r.l)} ${t('repo_suffix')}</a>`).join('')}</div>` : '';
+      const imgCap = p.imgCap ? tr(p.imgCap) : t('side_arch_default');
       return `<div class="pcard glass reveal spcard">
-        <div class="ptop"><div><span class="pname">${p.name}</span></div><span class="pyear">${p.year}</span></div>
-        ${p.tagline?`<div class="ptag">${p.tagline}</div>`:''}
-        ${p.summary?`<div class="psum">${p.summary}</div>`:''}
-        <div class="lbl">기술 스택</div><div class="stack">${stk}</div>
+        <div class="ptop"><div><span class="pname">${tr(p.name)}</span></div><span class="pyear">${p.year}</span></div>
+        ${p.tagline?`<div class="ptag">${tr(p.tagline)}</div>`:''}
+        ${p.summary?`<div class="psum">${tr(p.summary)}</div>`:''}
+        <div class="lbl">${t('stack_lbl')}</div><div class="stack">${stk}</div>
         ${flow?`<div class="side-flow">${flow}</div>`:''}
-        ${p.img?`<div class="lbl">아키텍처</div><figure class="shot side-fig"><img src="${p.img}" alt="아키텍처 구성도" loading="lazy"><figcaption>${p.imgCap||'전체 아키텍처 구성도'}</figcaption></figure>`:''}
+        ${p.img?`<div class="lbl">${t('arch_lbl')}</div><figure class="shot side-fig"><img src="${p.img}" alt="${imgCap.replace(/"/g,'&quot;')}" loading="lazy"><figcaption>${imgCap}</figcaption></figure>`:''}
         ${repo}
       </div>`;
     }).join('');
@@ -194,17 +200,17 @@
   function renderResearch(){
     const host=$('#researchCol'); if(!host) return;
     host.innerHTML = (window.RESEARCH||[]).map(r=>{
-      const stk = r.stack.map(s=>`<span class="stk">${s}</span>`).join('');
-      const topics = r.topics.map(t=>`<li>${t}<span class="ar">›</span></li>`).join('');
+      const stk = r.stack.map(s=>`<span class="stk">${tr(s)}</span>`).join('');
+      const topics = r.topics.map(x=>`<li>${tr(x)}<span class="ar">›</span></li>`).join('');
       return `<div class="rcard glass reveal">
-        <div class="rtop"><span class="rname">${r.title}</span><span class="rstatus">연구 · 대상 미정</span><span class="ryr">${r.tag||''}</span></div>
-        <div class="rsum">${r.summary}</div>
-        <div class="lbl">사용 기술</div><div class="stack">${stk}</div>
-        <div class="lbl">구조 다이어그램</div>
+        <div class="rtop"><span class="rname">${tr(r.title)}</span><span class="rstatus">${t('r_status')}</span><span class="ryr">${r.tag||''}</span></div>
+        <div class="rsum">${tr(r.summary)}</div>
+        <div class="lbl">${t('r_tech_lbl')}</div><div class="stack">${stk}</div>
+        <div class="lbl">${t('r_diag_lbl')}</div>
         <div class="diag-scroll"><div class="diag-box" data-id="${r.id}">${diagramHTML(r)}</div></div>
-        <div class="lbl">적용 후보 주제</div>
+        <div class="lbl">${t('r_topics_lbl')}</div>
         <ul class="sublist">${topics}</ul>
-        <div class="rappeal"><span class="rappeal-h">핵심 어필</span>${r.appeal}</div>
+        <div class="rappeal"><span class="rappeal-h">${t('r_appeal_h')}</span>${tr(r.appeal)}</div>
       </div>`;
     }).join('');
     (window.RESEARCH||[]).forEach(r=>{
@@ -245,26 +251,26 @@
     const host=$('#timeline'); if(!host) return;
     const blocks=[];
     window.CAREER.forEach(c=>{
-      const stackHtml = (c.stack||[]).map(s=>`<span class="stk">${s}</span>`).join('');
-      const dutyHtml = (c.duties||[]).map(d=>`<li>${d}</li>`).join('');
+      const stackHtml = (c.stack||[]).map(s=>`<span class="stk">${tr(s)}</span>`).join('');
+      const dutyHtml = (c.duties||[]).map(d=>`<li>${tr(d)}</li>`).join('');
       // 회사 · 역할 소개 카드
       blocks.push(`<div class="tlitem cvintro"><div class="tlcard glass">
-        <div class="tlhead"><span class="co">${c.co}</span><span class="ro">${c.role}</span><span class="yr">${c.yr}</span></div>
-        ${c.desc?`<div class="tldesc">${c.desc}</div>`:''}
-        ${dutyHtml?`<div class="cvblock"><span class="lbl">담당 업무</span><ul class="dolist">${dutyHtml}</ul></div>`:''}
-        ${stackHtml?`<div class="cvblock"><span class="lbl">사용 기술 스택</span><div class="stack">${stackHtml}</div></div>`:''}
+        <div class="tlhead"><span class="co">${tr(c.co)}</span><span class="ro">${tr(c.role)}</span><span class="yr">${c.yr}</span></div>
+        ${c.desc?`<div class="tldesc">${tr(c.desc)}</div>`:''}
+        ${dutyHtml?`<div class="cvblock"><span class="lbl">${t('duties_lbl')}</span><ul class="dolist">${dutyHtml}</ul></div>`:''}
+        ${stackHtml?`<div class="cvblock"><span class="lbl">${t('cv_stack_lbl')}</span><div class="stack">${stackHtml}</div></div>`:''}
       </div></div>`);
       // 프로젝트별 개별 카드
       (c.projects||[]).forEach(pr=>{
-        const secHtml = (pr.sections||[]).map(s=>`<div class="wsec"><div class="wsec-h">${s.h}</div><ul class="dolist">${s.items.map(t=>`<li>${t}</li>`).join('')}</ul></div>`).join('');
-        const itemHtml = (pr.items&&pr.items.length) ? `<ul class="dolist">${pr.items.map(t=>`<li>${t}</li>`).join('')}</ul>` : '';
-        const prStack = (pr.stack||[]).map(s=>`<span class="stk">${s}</span>`).join('');
-        const stackBlock = prStack ? `<div class="cv-stack"><span class="lbl">사용 기술</span><div class="stack">${prStack}</div></div>` : '';
+        const secHtml = (pr.sections||[]).map(s=>`<div class="wsec"><div class="wsec-h">${tr(s.h)}</div><ul class="dolist">${(tr(s.items)||[]).map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('');
+        const itemHtml = (pr.items&&pr.items.length) ? `<ul class="dolist">${tr(pr.items).map(x=>`<li>${x}</li>`).join('')}</ul>` : '';
+        const prStack = (pr.stack||[]).map(s=>`<span class="stk">${tr(s)}</span>`).join('');
+        const stackBlock = prStack ? `<div class="cv-stack"><span class="lbl">${t('cv_proj_stack_lbl')}</span><div class="stack">${prStack}</div></div>` : '';
         const inner = `${secHtml}${itemHtml}${stackBlock}`;
-        const toggle = inner ? `<div class="cvtoggle"><span class="car">▸</span> 세부 · 성과 보기</div><div class="cvbody">${inner}</div>` : '';
+        const toggle = inner ? `<div class="cvtoggle"><span class="car">▸</span> ${t('cv_toggle')}</div><div class="cvbody">${inner}</div>` : '';
         blocks.push(`<div class="tlitem cvcard"><div class="tlcard glass">
-          <div class="cvproj-h"><span class="cvp-t">${pr.title}</span><span class="cvp-p">${pr.period||''}</span></div>
-          ${pr.overview?`<p class="cvp-ov">${pr.overview}</p>`:''}
+          <div class="cvproj-h"><span class="cvp-t">${tr(pr.title)}</span><span class="cvp-p">${pr.period||''}</span></div>
+          ${pr.overview?`<p class="cvp-ov">${tr(pr.overview)}</p>`:''}
           ${toggle}
         </div></div>`);
       });
@@ -281,7 +287,7 @@
   function renderWays(){
     const host=$('#waysGrid'); if(!host) return;
     host.innerHTML = window.WAYS.map((w,i)=>
-      `<div class="way glass-sm reveal"><div class="wn">${w.n}</div><h3>${w.t}</h3><p>${w.p}</p>${i<2?'<span class="warw">→</span>':''}</div>`).join('');
+      `<div class="way glass-sm reveal"><div class="wn">${w.n}</div><h3>${tr(w.t)}</h3><p>${tr(w.p)}</p>${i<2?'<span class="warw">→</span>':''}</div>`).join('');
   }
 
   // ---------- DETAIL PAGE ----------
@@ -300,10 +306,10 @@
       : ((t.match(/\(\s*\d+\s*\)/g)||[]).length>=2) ? t.split(/(?=\(\s*\d+\s*\))/).map(s=>s.trim()).filter(Boolean)
       : [t];
     const field = (label,cls,val) => {
-      const items = norm(val).flatMap(splitNum);
+      const items = norm(tr(val)).flatMap(splitNum);
       if(!items.length) return '';
       if(items.length===1) return `<div class="wf"><span class="wfl ${cls}">${label}</span><p>${items[0]}</p></div>`;
-      const lis = items.map(t=>`<li class="${NUMRE.test(t)?'num':''}">${t}</li>`).join('');
+      const lis = items.map(x=>`<li class="${NUMRE.test(x)?'num':''}">${x}</li>`).join('');
       return `<div class="wf"><span class="wfl ${cls}">${label}</span><ul class="dolist">${lis}</ul></div>`;
     };
 
@@ -318,46 +324,46 @@
       const bg = isObj ? w.background : '';
       const dos = isObj ? w.detail : '';
       const figs = (isObj && w.figures) ? w.figures : [];
-      const briefHtml = brief ? `<p class="wi-brief">${brief}</p>` : '';
-      const bgHtml = field('배경','bg',bg);
-      const solHtml = field('해결','sol',isObj?w.solution:'');
-      const resHtml = field('결과','res',isObj?w.result:'');
-      const retroHtml = field('회고','retro',isObj?w.retro:'');
-      const doHtml = field('한 일','do',dos);
+      const briefHtml = brief ? `<p class="wi-brief">${tr(brief)}</p>` : '';
+      const bgHtml = field(t('f_bg'),'bg',bg);
+      const solHtml = field(t('f_sol'),'sol',isObj?w.solution:'');
+      const resHtml = field(t('f_res'),'res',isObj?w.result:'');
+      const retroHtml = field(t('f_retro'),'retro',isObj?w.retro:'');
+      const doHtml = field(t('f_do'),'do',dos);
       const figHtml = figs.map((f,j)=>{
         const fid=p.id+'~wfig-'+i+'-'+j;
-        return `<div class="fig-block"><div class="fig-cap">${f.title||''}</div><div class="diag-scroll"><div class="diag-box" data-id="${fid}">${diagramHTML({id:fid,nodes:f.nodes,edges:f.edges,zones:f.zones})}</div></div></div>`;
+        return `<div class="fig-block"><div class="fig-cap">${tr(f.title)||''}</div><div class="diag-scroll"><div class="diag-box" data-id="${fid}">${diagramHTML({id:fid,nodes:f.nodes,edges:f.edges,zones:f.zones})}</div></div></div>`;
       }).join('');
       const figWrap = figHtml ? `<div class="figrow">${figHtml}</div>` : '';
       // sections: {h, items[]} 그룹형 세부 (수집/가공/점수 등)
       const secs = (isObj && w.sections) ? w.sections : [];
       const secHtml = secs.map(s=>{
-        const lis = norm(s.items).flatMap(splitNum).map(t=>`<li class="${NUMRE.test(t)?'num':''}">${t}</li>`).join('');
-        return `<div class="wsec"><div class="wsec-h">${s.h}</div><ul class="dolist">${lis}</ul></div>`;
+        const lis = norm(tr(s.items)).flatMap(splitNum).map(x=>`<li class="${NUMRE.test(x)?'num':''}">${x}</li>`).join('');
+        return `<div class="wsec"><div class="wsec-h">${tr(s.h)}</div><ul class="dolist">${lis}</ul></div>`;
       }).join('');
       // 실제 화면 스크린샷 (클릭 시 라이트박스 확대)
       const shots = (isObj && w.shots) ? w.shots : [];
-      const shotHtml = shots.length ? `<div class="shotrow">${shots.map(s=>`<figure class="shot"><img src="${s.src}" alt="${(s.cap||'').replace(/"/g,'&quot;')}" loading="lazy"><figcaption>${s.cap||''}</figcaption></figure>`).join('')}</div>` : '';
+      const shotHtml = shots.length ? `<div class="shotrow">${shots.map(s=>{const cap=tr(s.cap)||'';return `<figure class="shot"><img src="${s.src}" alt="${cap.replace(/"/g,'&quot;')}" loading="lazy"><figcaption>${cap}</figcaption></figure>`;}).join('')}</div>` : '';
       let expand = '';
       if(bgHtml||solHtml||resHtml||retroHtml||doHtml||secHtml||figWrap||shotHtml){
-        expand = `<div class="d4toggle"><span class="car">▸</span> 세부 보기</div><div class="d4">${bgHtml}${solHtml}${figWrap}${resHtml}${retroHtml}${doHtml}${secHtml}${shotHtml}</div>`;
+        expand = `<div class="d4toggle"><span class="car">▸</span> ${t('detail_more')}</div><div class="d4">${bgHtml}${solHtml}${figWrap}${resHtml}${retroHtml}${doHtml}${secHtml}${shotHtml}</div>`;
       }
-      return `<div class="witem"><div class="wi-h"><span class="wn">${i+1}</span><span class="wt">${title}</span>${tagHtml}</div>${briefHtml}${expand}</div>`;
+      return `<div class="witem"><div class="wi-h"><span class="wn">${i+1}</span><span class="wt">${tr(title)}</span>${tagHtml}</div>${briefHtml}${expand}</div>`;
     }).join('')}</div>`;
-    out.push(sec(1,'핵심 기능','제목·요약 · 세부는 펼치기', work));
+    out.push(sec(1,t('core_feat'),t('core_feat_fmt'), work));
 
     // 2. 결과 · 성과 (지표가 있을 때만)
     let n=2;
     if(p.metrics && p.metrics.length){
-      const metrics = `<div class="metrics">${p.metrics.map(m=>`<div class="metric"><div class="big">${m.big}</div><div class="cap">${m.cap}</div></div>`).join('')}</div>`;
-      out.push(sec(n++,'결과 · 성과','지표', metrics));
+      const metrics = `<div class="metrics">${p.metrics.map(m=>`<div class="metric"><div class="big">${m.big}</div><div class="cap">${tr(m.cap)}</div></div>`).join('')}</div>`;
+      out.push(sec(n++,t('result_perf'),t('result_perf_fmt'), metrics));
     }
 
     // 3. 실제 화면 (제품·대시보드 스크린샷) — 성과 영역
     if(p.shots && p.shots.length){
-      const note = p.shotsNote ? `<p class="shot-note">${p.shotsNote}</p>` : '';
-      const gallery = `<div class="shot-gallery">${p.shots.map(s=>`<figure class="shot"><img src="${s.src}" alt="${(s.cap||'').replace(/"/g,'&quot;')}" loading="lazy"><figcaption>${s.cap||''}</figcaption></figure>`).join('')}</div>`;
-      out.push(sec(n++,'실제 화면','대시보드 · 스크린샷', note+gallery));
+      const note = p.shotsNote ? `<p class="shot-note">${tr(p.shotsNote)}</p>` : '';
+      const gallery = `<div class="shot-gallery">${p.shots.map(s=>{const cap=tr(s.cap)||'';return `<figure class="shot"><img src="${s.src}" alt="${cap.replace(/"/g,'&quot;')}" loading="lazy"><figcaption>${cap}</figcaption></figure>`;}).join('')}</div>`;
+      out.push(sec(n++,t('screens'),t('screens_fmt'), note+gallery));
     }
 
     // 4. 보조 다이어그램 (구독 갱신 · 배포 구조 등)
@@ -366,23 +372,25 @@
         const did=p.id+'~'+g.key;
         const cls='diag-box'+(g.flat?' deploy-box':'');
         const box=`<div class="diag-scroll"><div class="${cls}" data-id="${did}">${diagramHTML({id:did,nodes:g.nodes,edges:g.edges})}</div></div>`;
-        out.push(sec(n++, g.title, g.fmt||'', box));
+        out.push(sec(n++, tr(g.title), tr(g.fmt)||'', box));
       });
     }
     return out.join('');
   }
-  function openDetail(p){
-    $('#dpCrumb').textContent=p.name;
-    $('#dpTitle').textContent=p.name;
+  let currentDetail=null;
+  function openDetail(p, skipHistory){
+    currentDetail=p;
+    $('#dpCrumb').textContent=tr(p.name);
+    $('#dpTitle').textContent=tr(p.name);
     $('#dpYear').textContent=p.year;
-    $('#dpStack').innerHTML=p.stack.map(s=>`<span class="stk">${s}</span>`).join('');
+    $('#dpStack').innerHTML=p.stack.map(s=>`<span class="stk">${tr(s)}</span>`).join('');
     const tagEl=$('#dpTagline');
-    if(tagEl){ const tl=(p.about&&p.about.tagline)||''; tagEl.innerHTML=tl; tagEl.style.display=tl?'':'none'; }
+    if(tagEl){ const tl=(p.about&&p.about.tagline)?tr(p.about.tagline):''; tagEl.innerHTML=tl; tagEl.style.display=tl?'':'none'; }
     const abEl=$('#dpAbout');
     if(abEl){ const ab=aboutHTML(p); abEl.innerHTML=ab; abEl.style.display=ab?'':'none'; }
     const techH=$('#dpTechH'); if(techH) techH.style.display=p.overview?'':'none';
-    $('#dpOverview').textContent=p.overview;
-    $('#dpStructWrap').innerHTML=`<span class="dp-struct-chip"><span style="width:7px;height:7px;border-radius:2px;background:var(--struct);display:inline-block"></span> 구조 유형 · ${p.struct}</span>`;
+    $('#dpOverview').textContent=tr(p.overview);
+    $('#dpStructWrap').innerHTML=`<span class="dp-struct-chip"><span style="width:7px;height:7px;border-radius:2px;background:var(--struct);display:inline-block"></span> ${t('struct_chip')} ${tr(p.struct)}</span>`;
     const diag=$('#dpDiag');
     const diagScroll=diag.closest('.diag-scroll');
     const archH=diagScroll?diagScroll.previousElementSibling:null;
@@ -419,9 +427,10 @@
     detailPage.classList.add('on');
     const dsc=$('#dpScroll'); if(dsc) dsc.scrollTop=0;
     document.body.style.overflow='hidden';
-    history.pushState({detail:p.id},'', '#'+p.id);
+    if(!skipHistory) history.pushState({detail:p.id},'', '#'+p.id);
   }
   function closeDetail(){
+    currentDetail=null;
     detailPage.classList.remove('on');
     document.body.style.overflow='';
     if(location.hash) history.replaceState(null,'',location.pathname+location.search);
@@ -455,23 +464,21 @@
   tt.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark',true));
 
   // ---------- tutorial ----------
-  const TUT=[
-    {t:'위에서부터 훑어 내려오세요', b:'상단 <b>키워드 칩</b>을 누르면 그 키워드가 쓰인 <b>프로젝트 상세 페이지</b>로 바로 이동합니다. 칩은 <b>실선=기술명</b>, <b>점선=구조·설계 키워드</b>예요. 위쪽 메뉴로 섹션 사이도 빠르게 오갈 수 있습니다.'},
-    {t:'프로젝트는 깊이별로 열립니다', b:'목록 카드는 <b>제목만(1depth)</b> 보여줘요. 카드를 누르면 <b>별도 상세 페이지</b>로 넘어가 구조·작업·해결한 문제(2depth)가 펼쳐지고, 각 항목의 <b>내용 펼치기</b>로 설계도·세부 내용(3depth)이 그 자리에서 열립니다.'},
-  ];
+  const TUT=()=>t('tut')||[];
   const tut=$('#tut'), tutCard=$('#tutCard'); let ti=0;
   function renderTut(){
-    $('#tutStep').textContent='STEP '+(ti+1)+' / '+TUT.length;
-    $('#tutTitle').textContent=TUT[ti].t;
-    $('#tutBody').innerHTML=TUT[ti].b;
-    $('#tutDots').innerHTML=TUT.map((_,i)=>`<i class="${i===ti?'a':''}"></i>`).join('');
-    $('#tutNext').textContent= ti<TUT.length-1 ? '다음 →' : '시작하기 ✓';
+    const steps=TUT();
+    $('#tutStep').textContent=t('tut_step')+' '+(ti+1)+' / '+steps.length;
+    $('#tutTitle').textContent=steps[ti].t;
+    $('#tutBody').innerHTML=steps[ti].b;
+    $('#tutDots').innerHTML=steps.map((_,i)=>`<i class="${i===ti?'a':''}"></i>`).join('');
+    $('#tutNext').textContent= ti<steps.length-1 ? t('tut_next') : t('tut_start');
     const sl=$('#tutSlide'); // step 전환 애니메이션 재생 (reflow로 재트리거)
     if(sl){ sl.classList.remove('tut-in'); void sl.offsetWidth; sl.classList.add('tut-in'); }
   }
   function openTut(){ ti=0; renderTut(); tut.classList.add('on'); }
   function closeTut(){ tut.classList.remove('on'); try{localStorage.setItem('pf_tut','1');}catch(e){} }
-  function advTut(){ if(ti<TUT.length-1){ ti++; renderTut(); } else closeTut(); }
+  function advTut(){ if(ti<TUT().length-1){ ti++; renderTut(); } else closeTut(); }
   $('#tutNext').addEventListener('click',e=>{e.stopPropagation(); advTut();});
   $('#tutSkip').addEventListener('click',e=>{e.stopPropagation(); closeTut();});
   tut.addEventListener('click',e=>{ if(e.target===tut) advTut(); });
@@ -481,6 +488,24 @@
   // ---------- reveal (no-op; content always visible) ----------
   function checkReveal(){}
   function initReveal(){}
+
+  // ---------- language switch ----------
+  function syncLangSeg(){
+    $$('#langSeg button').forEach(b=>b.classList.toggle('on', b.dataset.lang===window.I18N.lang));
+  }
+  $$('#langSeg button').forEach(b=>b.addEventListener('click',()=>window.I18N.set(b.dataset.lang)));
+  syncLangSeg();
+  window.addEventListener('langchange',()=>{
+    syncLangSeg();
+    renderChips(); renderSkills(); renderProjects(); renderSideProjects(); renderTimeline(); renderWays();
+    // 상세 페이지가 열려 있으면 히스토리 추가 없이 현재 언어로 다시 채움
+    if(detailPage.classList.contains('on') && currentDetail) openDetail(currentDetail, true);
+    // 재렌더 후 다이어그램·플로우 다시 그림
+    requestAnimationFrame(()=>{
+      drawFlow();
+      document.querySelectorAll('.diag-box').forEach(b=>{ const dg=findById(b.dataset.id); if(dg) drawDiagramEdges(b,dg); });
+    });
+  });
 
   // ---------- init ----------
   renderChips(); renderSkills(); renderProjects(); renderSideProjects(); renderTimeline(); renderWays();
