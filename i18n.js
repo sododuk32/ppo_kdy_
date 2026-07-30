@@ -77,7 +77,7 @@
       p_howto:'PDF로 저장: <code>Ctrl+P</code> → 대상 <b>“PDF로 저장”</b> → 추가 설정 <b>“배경 그래픽” 체크</b> · 용지 A4 · 여백 기본. 이 안내 박스는 인쇄물에는 나오지 않습니다.',
     },
     ja:{
-      doc_title:'フロントエンドポートフォリオ · 곽대양',
+      doc_title:'フロントエンドポートフォリオ · カク　デヤン',
       lang_switch_title:'言語切り替え (한국어 / 日本語)',
       // nav
       nav_chips:'キーワード', nav_skills:'スキル', nav_projects:'プロジェクト', nav_side:'個人プロジェクト', nav_career:'経歴',
